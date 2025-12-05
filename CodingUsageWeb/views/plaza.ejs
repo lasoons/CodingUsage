@@ -5,6 +5,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Coding Usage</title>
+  <link rel="icon" type="image/png" href="<%= basePath %>/static/web_logo.png" />
+  <link rel="shortcut icon" href="<%= basePath %>/static/web_logo.png" />
+  <link rel="apple-touch-icon" href="<%= basePath %>/static/web_logo.png" />
   <link rel="stylesheet" href="<%= basePath %>/static/style.css" />
   <style>
     .sort-bar {
@@ -218,20 +221,22 @@
     <nav class="nav">
       <div class="left">
         <a href="<%= basePath %>/" class="brand">
-          <img src="<%= basePath %>/static/web_log.png" alt="Logo" style="width: 24px; height: 24px;" />
+          <img src="<%= basePath %>/static/web_logo.png" alt="Logo" style="width: 24px; height: 24px;" />
           Coding Usage
         </a>
       </div>
       <div class="right">
         <% if (hasBoundKeys) { %>
           <a href="<%= basePath %>/me">My Stats (<%= boundApiKeysCount %>)</a>
-        <% } %>
-        <button type="button" class="btn-primary" id="bindKeyBtn">
-          <svg class="octicon" viewBox="0 0 16 16" width="16" height="16">
-            <path d="M6.5 5.5a4 4 0 0 1 7.43 2.11.75.75 0 0 0 1.49-.16 5.5 5.5 0 1 0-10.4 3.38l-.08.08-1.63 1.63A1.75 1.75 0 0 0 3 13.75V15h1.25a1.75 1.75 0 0 0 1.24-.51l.52-.52h1.5c.69 0 1.25-.56 1.25-1.25v-.25h.75c.69 0 1.25-.56 1.25-1.25V10h1.01a.75.75 0 0 0 .53-.22l.09-.09.08-.04A4 4 0 0 0 6.5 5.5zM9 5.5a1 1 0 1 1 2 0 1 1 0 0 1-2 0z"></path>
-          </svg>
-          Bind API Key
-        </button>
+          <% } %>
+            <button type="button" class="btn-primary" id="bindKeyBtn">
+              <svg class="octicon" viewBox="0 0 16 16" width="16" height="16">
+                <path
+                  d="M6.5 5.5a4 4 0 0 1 7.43 2.11.75.75 0 0 0 1.49-.16 5.5 5.5 0 1 0-10.4 3.38l-.08.08-1.63 1.63A1.75 1.75 0 0 0 3 13.75V15h1.25a1.75 1.75 0 0 0 1.24-.51l.52-.52h1.5c.69 0 1.25-.56 1.25-1.25v-.25h.75c.69 0 1.25-.56 1.25-1.25V10h1.01a.75.75 0 0 0 .53-.22l.09-.09.08-.04A4 4 0 0 0 6.5 5.5zM9 5.5a1 1 0 1 1 2 0 1 1 0 0 1-2 0z">
+                </path>
+              </svg>
+              Bind API Key
+            </button>
       </div>
     </nav>
 
@@ -240,152 +245,155 @@
       hh=String(d.getHours()).padStart(2,'0'); const mi=String(d.getMinutes()).padStart(2,'0'); return `${mm}-${dd}
       ${hh}:${mi}`; } %>
       <% function dollars(cents){ return `$${((cents||0)/100).toFixed(2)}` } %>
-      <% function formatUsage(value, isTrae){ return isTrae ? value : dollars(value); } %>
-        <% function fmtActivity(ts) { if(!ts){return 'Never' ;} const d=new Date(Number(ts)); const
-          mm=String(d.getMonth()+1).padStart(2,'0'); const dd=String(d.getDate()).padStart(2,'0'); const
-          hh=String(d.getHours()).padStart(2,'0'); const mi=String(d.getMinutes()).padStart(2,'0'); return `${mm}-${dd}
-          ${hh}:${mi}`; } %>
+        <% function formatUsage(value, isTrae){ return isTrae ? value : dollars(value); } %>
+          <% function fmtActivity(ts) { if(!ts){return 'Never' ;} const d=new Date(Number(ts)); const
+            mm=String(d.getMonth()+1).padStart(2,'0'); const dd=String(d.getDate()).padStart(2,'0'); const
+            hh=String(d.getHours()).padStart(2,'0'); const mi=String(d.getMinutes()).padStart(2,'0'); return
+            `${mm}-${dd} ${hh}:${mi}`; } %>
 
-          <!-- 排序控制栏 -->
-          <div class="sort-bar">
-            <div class="sort-info">
-              <svg class="octicon" viewBox="0 0 16 16" width="16" height="16"
-                style="margin-right: 6px; vertical-align: -3px;">
-                <path
-                  d="M0 1.75A.75.75 0 01.75 1h10.5a.75.75 0 010 1.5H.75A.75.75 0 010 1.75zm0 6A.75.75 0 01.75 7h7.5a.75.75 0 010 1.5H.75A.75.75 0 010 7.75zm0 6A.75.75 0 01.75 13h4.5a.75.75 0 010 1.5H.75a.75.75 0 01-.75-.75z">
-                </path>
-              </svg>
-              <strong>
-                <%= cards.length %>
-              </strong> subscriptions
-            </div>
-            <div class="sort-dropdown">
-              <div class="dropdown-overlay" id="dropdownOverlay"></div>
-              <button type="button" class="sort-trigger" id="sortTrigger">
-                Sort
-                <svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor" style="margin-left: 4px;">
+            <!-- 排序控制栏 -->
+            <div class="sort-bar">
+              <div class="sort-info">
+                <svg class="octicon" viewBox="0 0 16 16" width="16" height="16"
+                  style="margin-right: 6px; vertical-align: -3px;">
                   <path
-                    d="M4.427 9.573l3.396 3.396a.25.25 0 00.354 0l3.396-3.396A.25.25 0 0011.396 9H4.604a.25.25 0 00-.177.427z">
+                    d="M0 1.75A.75.75 0 01.75 1h10.5a.75.75 0 010 1.5H.75A.75.75 0 010 1.75zm0 6A.75.75 0 01.75 7h7.5a.75.75 0 010 1.5H.75A.75.75 0 010 7.75zm0 6A.75.75 0 01.75 13h4.5a.75.75 0 010 1.5H.75a.75.75 0 01-.75-.75z">
                   </path>
                 </svg>
-              </button>
-              <div class="dropdown-menu" id="sortMenu">
-                <div class="dropdown-header">Sort by</div>
-                <button type="button" class="dropdown-item <%= sortBy === 'activity' ? 'selected' : '' %>"
-                  data-sort="activity">
-                  <svg viewBox="0 0 16 16" fill="currentColor" class="check-icon">
+                <strong>
+                  <%= cards.length %>
+                </strong> subscriptions
+              </div>
+              <div class="sort-dropdown">
+                <div class="dropdown-overlay" id="dropdownOverlay"></div>
+                <button type="button" class="sort-trigger" id="sortTrigger">
+                  Sort
+                  <svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor" style="margin-left: 4px;">
                     <path
-                      d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z">
+                      d="M4.427 9.573l3.396 3.396a.25.25 0 00.354 0l3.396-3.396A.25.25 0 0011.396 9H4.604a.25.25 0 00-.177.427z">
                     </path>
                   </svg>
-                  Activity Time
                 </button>
-                <button type="button" class="dropdown-item <%= sortBy === 'usage' ? 'selected' : '' %>"
-                  data-sort="usage">
-                  <svg viewBox="0 0 16 16" fill="currentColor" class="check-icon">
-                    <path
-                      d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z">
-                    </path>
-                  </svg>
-                  Usage Amount
-                </button>
-                <div class="dropdown-divider"></div>
-                <div class="dropdown-header">Order</div>
-                <button type="button" class="dropdown-item <%= order === 'desc' ? 'selected' : '' %>" data-order="desc">
-                  <svg viewBox="0 0 16 16" fill="currentColor" class="check-icon">
-                    <path
-                      d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z">
-                    </path>
-                  </svg>
-                  Descending
-                </button>
-                <button type="button" class="dropdown-item <%= order === 'asc' ? 'selected' : '' %>" data-order="asc">
-                  <svg viewBox="0 0 16 16" fill="currentColor" class="check-icon">
-                    <path
-                      d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z">
-                    </path>
-                  </svg>
-                  Ascending
-                </button>
+                <div class="dropdown-menu" id="sortMenu">
+                  <div class="dropdown-header">Sort by</div>
+                  <button type="button" class="dropdown-item <%= sortBy === 'activity' ? 'selected' : '' %>"
+                    data-sort="activity">
+                    <svg viewBox="0 0 16 16" fill="currentColor" class="check-icon">
+                      <path
+                        d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z">
+                      </path>
+                    </svg>
+                    Activity Time
+                  </button>
+                  <button type="button" class="dropdown-item <%= sortBy === 'usage' ? 'selected' : '' %>"
+                    data-sort="usage">
+                    <svg viewBox="0 0 16 16" fill="currentColor" class="check-icon">
+                      <path
+                        d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z">
+                      </path>
+                    </svg>
+                    Usage Amount
+                  </button>
+                  <div class="dropdown-divider"></div>
+                  <div class="dropdown-header">Order</div>
+                  <button type="button" class="dropdown-item <%= order === 'desc' ? 'selected' : '' %>"
+                    data-order="desc">
+                    <svg viewBox="0 0 16 16" fill="currentColor" class="check-icon">
+                      <path
+                        d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z">
+                      </path>
+                    </svg>
+                    Descending
+                  </button>
+                  <button type="button" class="dropdown-item <%= order === 'asc' ? 'selected' : '' %>" data-order="asc">
+                    <svg viewBox="0 0 16 16" fill="currentColor" class="check-icon">
+                      <path
+                        d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z">
+                      </path>
+                    </svg>
+                    Ascending
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
 
-          <% if (cards.length===0) { %>
-            <div class="panel">
-              <div class="empty-state">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-                </svg>
-                <h3>No Public Subscriptions Yet</h3>
-                <p>No public subscriptions available at the moment. Users can enable public visibility in their settings.</p>
+            <% if (cards.length===0) { %>
+              <div class="panel">
+                <div class="empty-state">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                  </svg>
+                  <h3>No Public Subscriptions Yet</h3>
+                  <p>No public subscriptions available at the moment. Users can enable public visibility in their
+                    settings.</p>
+                </div>
               </div>
-            </div>
-            <% } else { %>
-              <div class="grid">
-                <% cards.forEach(c=> { %>
-                  <% const pct=(c.total_usage && c.total_usage>0 ? Math.min(100,
-                    Math.round((c.used_usage/c.total_usage)*100)) : 0); %>
-                    <% const progressClass=pct>= 90 ? 'danger' : (pct >= 70 ? 'warning' : ''); %>
-                      <div class="card"
-                        title="Used: <%= formatUsage(c.used_usage, c.is_trae) %><%= c.bonus_usage > 0 ? ' (Bonus: +' + formatUsage(c.bonus_usage, c.is_trae) + ')' : '' %> | Remain: <%= formatUsage(c.remaining_usage, c.is_trae) %><%= c.app_name ? ' | App: ' + c.app_name : '' %>">
-                        <div class="card-top">
-                          <div class="status-dot">
-                            <span class="dot <%= c.online ? 'online' : '' %>"></span>
-                            <span>
-                              <%= c.online ? 'Online' : 'Offline' %>
+              <% } else { %>
+                <div class="grid">
+                  <% cards.forEach(c=> { %>
+                    <% const pct=(c.total_usage && c.total_usage>0 ? Math.min(100,
+                      Math.round((c.used_usage/c.total_usage)*100)) : 0); %>
+                      <% const progressClass=pct>= 90 ? 'danger' : (pct >= 70 ? 'warning' : ''); %>
+                        <div class="card"
+                          title="Used: <%= formatUsage(c.used_usage, c.is_trae) %><%= c.bonus_usage > 0 ? ' (Bonus: +' + formatUsage(c.bonus_usage, c.is_trae) + ')' : '' %> | Remain: <%= formatUsage(c.remaining_usage, c.is_trae) %><%= c.app_name ? ' | App: ' + c.app_name : '' %>">
+                          <div class="card-top">
+                            <div class="status-dot">
+                              <span class="dot <%= c.online ? 'online' : '' %>"></span>
+                              <span>
+                                <%= c.online ? 'Online' : 'Offline' %>
+                              </span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                              <% if (c.app_logo) { %>
+                                <img src="<%= c.app_logo %>" alt="<%= c.app_name %>"
+                                  style="width: 16px; height: 16px; border-radius: 3px;" />
+                                <% } %>
+                                  <span
+                                    class="tag <%= c.membership_type === 'pro' ? 'pro' : (c.membership_type === 'business' ? 'business' : '') %>">
+                                    <%= c.membership_type || 'Free' %>
+                                  </span>
+                            </div>
+                          </div>
+                          <div class="card-main">
+                            <span class="email">
+                              <%= c.email || c.api_key_short %>
                             </span>
                           </div>
-                          <div style="display: flex; align-items: center; gap: 6px;">
-                            <% if (c.app_logo) { %>
-                              <img src="<%= c.app_logo %>" alt="<%= c.app_name %>" style="width: 16px; height: 16px; border-radius: 3px;" />
-                            <% } %>
-                            <span
-                              class="tag <%= c.membership_type === 'pro' ? 'pro' : (c.membership_type === 'business' ? 'business' : '') %>">
-                              <%= c.membership_type || 'Free' %>
-                            </span>
+                          <div class="progress <%= progressClass %>">
+                            <div class="bar" style="--w: <%= pct %>%"></div>
+                          </div>
+                          <div class="meta">
+                            <div>
+                              <% if (c.expire_time) { %>
+                                Exp: <%= fmtExpire(c.expire_time) %>
+                                  <% } %>
+                            </div>
+                            <div>
+                              Remain: <%= formatUsage(c.remaining_usage, c.is_trae) %>
+                            </div>
+                          </div>
+                          <div class="meta" style="margin-top: 4px; font-size: 11px; color: #8c959f;">
+                            <div>
+                              <svg class="octicon" viewBox="0 0 16 16" width="12" height="12"
+                                style="vertical-align: -2px; margin-right: 2px;">
+                                <path
+                                  d="M1.5 8a6.5 6.5 0 1113 0 6.5 6.5 0 01-13 0zM8 0a8 8 0 100 16A8 8 0 008 0zm.5 4.75a.75.75 0 00-1.5 0v3.5a.75.75 0 00.37.65l2.5 1.5a.75.75 0 00.76-1.3L8.5 7.69V4.75z">
+                                </path>
+                              </svg>
+                              Last: <%= fmtActivity(c.last_activity) %>
+                            </div>
+                            <div>
+                              <%= formatUsage(c.used_usage, c.is_trae) %>
+                                <% if (c.bonus_usage> 0) { %><span style="color: #f97316;"> (+<%=
+                                      formatUsage(c.bonus_usage, c.is_trae) %>)</span>
+                                  <% } %>
+                            </div>
                           </div>
                         </div>
-                        <div class="card-main">
-                          <span class="email">
-                            <%= c.email || c.api_key_short %>
-                          </span>
-                        </div>
-                        <div class="progress <%= progressClass %>">
-                          <div class="bar" style="--w: <%= pct %>%"></div>
-                        </div>
-                        <div class="meta">
-                          <div>
-                            <% if (c.expire_time) { %>
-                              Exp: <%= fmtExpire(c.expire_time) %>
-                                <% } %>
-                          </div>
-                          <div>
-                            Remain: <%= formatUsage(c.remaining_usage, c.is_trae) %>
-                          </div>
-                        </div>
-                        <div class="meta" style="margin-top: 4px; font-size: 11px; color: #8c959f;">
-                          <div>
-                            <svg class="octicon" viewBox="0 0 16 16" width="12" height="12"
-                              style="vertical-align: -2px; margin-right: 2px;">
-                              <path
-                                d="M1.5 8a6.5 6.5 0 1113 0 6.5 6.5 0 01-13 0zM8 0a8 8 0 100 16A8 8 0 008 0zm.5 4.75a.75.75 0 00-1.5 0v3.5a.75.75 0 00.37.65l2.5 1.5a.75.75 0 00.76-1.3L8.5 7.69V4.75z">
-                              </path>
-                            </svg>
-                            Last: <%= fmtActivity(c.last_activity) %>
-                          </div>
-                          <div>
-                            <%= formatUsage(c.used_usage, c.is_trae) %>
-                              <% if (c.bonus_usage> 0) { %><span style="color: #f97316;"> (+<%= formatUsage(c.bonus_usage, c.is_trae)
-                                    %>)</span>
-                                <% } %>
-                          </div>
-                        </div>
-                      </div>
-                      <% }) %>
-              </div>
-              <% } %>
+                        <% }) %>
+                </div>
+                <% } %>
   </div>
 
   <!-- Bind API Key Modal -->
@@ -393,9 +401,11 @@
     <div class="modal">
       <div class="modal-title">Bind API Key</div>
       <div class="modal-desc">
-        Enter your Client API Key from the Cursor Usage extension. You can find it in Cursor Settings → Extensions → Cursor Usage → Client API Key, or use the "Copy Client API Key" command.
+        Enter your Client API Key from the Cursor Usage extension. You can find it in Cursor Settings → Extensions →
+        Cursor Usage → Client API Key, or use the "Copy Client API Key" command.
       </div>
-      <input type="text" class="modal-input" id="apiKeyInput" placeholder="ck_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" maxlength="35" />
+      <input type="text" class="modal-input" id="apiKeyInput" placeholder="ck_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        maxlength="35" />
       <div class="modal-error" id="bindError"></div>
       <div class="modal-actions">
         <button type="button" class="btn" id="cancelBind">Cancel</button>
@@ -421,7 +431,7 @@
       function saveBoundApiKeys(keys) {
         localStorage.setItem(API_KEYS_STORAGE_KEY, JSON.stringify(keys));
         // 同步到 cookie 以便服务端读取
-        document.cookie = `boundApiKeys=${encodeURIComponent(JSON.stringify(keys))};path=/;max-age=${365*24*60*60}`;
+        document.cookie = `boundApiKeys=${encodeURIComponent(JSON.stringify(keys))};path=/;max-age=${365 * 24 * 60 * 60}`;
       }
 
       function addBoundApiKey(apiKey) {
@@ -544,9 +554,9 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ api_key: apiKey })
           });
-          
+
           const data = await res.json();
-          
+
           if (res.ok) {
             // 保存到本地存储
             addBoundApiKey(apiKey);

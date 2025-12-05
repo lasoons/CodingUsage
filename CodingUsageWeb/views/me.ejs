@@ -5,6 +5,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>My Stats - Coding Usage</title>
+  <link rel="icon" type="image/png" href="<%= basePath %>/static/web_logo.png" />
+  <link rel="shortcut icon" href="<%= basePath %>/static/web_logo.png" />
+  <link rel="apple-touch-icon" href="<%= basePath %>/static/web_logo.png" />
   <link rel="stylesheet" href="<%= basePath %>/static/style.css" />
   <style>
     .key-section {
@@ -183,7 +186,6 @@
       color: #57606a;
       margin-bottom: 16px;
     }
-
   </style>
 </head>
 
@@ -192,7 +194,7 @@
     <nav class="nav">
       <div class="left">
         <a href="<%= basePath %>/" class="brand">
-          <img src="<%= basePath %>/static/web_log.png" alt="Logo" style="width: 24px; height: 24px;" />
+          <img src="<%= basePath %>/static/web_logo.png" alt="Logo" style="width: 24px; height: 24px;" />
           Coding Usage
         </a>
       </div>
@@ -200,7 +202,9 @@
         <a href="<%= basePath %>/">Plaza</a>
         <button type="button" class="btn-primary" id="bindKeyBtn">
           <svg class="octicon" viewBox="0 0 16 16" width="16" height="16">
-            <path d="M7.75 2a.75.75 0 01.75.75V7h4.25a.75.75 0 010 1.5H8.5v4.25a.75.75 0 01-1.5 0V8.5H2.75a.75.75 0 010-1.5H7V2.75A.75.75 0 017.75 2z"></path>
+            <path
+              d="M7.75 2a.75.75 0 01.75.75V7h4.25a.75.75 0 010 1.5H8.5v4.25a.75.75 0 01-1.5 0V8.5H2.75a.75.75 0 010-1.5H7V2.75A.75.75 0 017.75 2z">
+            </path>
           </svg>
           Add API Key
         </button>
@@ -214,135 +218,165 @@
 
     <% if (!hasBoundKeys) { %>
       <div class="no-keys-message">
-        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#57606a" stroke-width="1.5" style="margin-bottom: 16px;">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#57606a" stroke-width="1.5"
+          style="margin-bottom: 16px;">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
         </svg>
         <h3>No API Keys Bound</h3>
-        <p>Bind your Client API Key to view your usage statistics. You can find your API Key in Cursor Settings → Extensions → Cursor Usage.</p>
+        <p>Bind your Client API Key to view your usage statistics. You can find your API Key in Cursor Settings →
+          Extensions → Cursor Usage.</p>
         <button type="button" class="btn-primary" id="bindKeyBtnEmpty">
           <svg class="octicon" viewBox="0 0 16 16" width="16" height="16">
-            <path d="M6.5 5.5a4 4 0 0 1 7.43 2.11.75.75 0 0 0 1.49-.16 5.5 5.5 0 1 0-10.4 3.38l-.08.08-1.63 1.63A1.75 1.75 0 0 0 3 13.75V15h1.25a1.75 1.75 0 0 0 1.24-.51l.52-.52h1.5c.69 0 1.25-.56 1.25-1.25v-.25h.75c.69 0 1.25-.56 1.25-1.25V10h1.01a.75.75 0 0 0 .53-.22l.09-.09.08-.04A4 4 0 0 0 6.5 5.5zM9 5.5a1 1 0 1 1 2 0 1 1 0 0 1-2 0z"></path>
+            <path
+              d="M6.5 5.5a4 4 0 0 1 7.43 2.11.75.75 0 0 0 1.49-.16 5.5 5.5 0 1 0-10.4 3.38l-.08.08-1.63 1.63A1.75 1.75 0 0 0 3 13.75V15h1.25a1.75 1.75 0 0 0 1.24-.51l.52-.52h1.5c.69 0 1.25-.56 1.25-1.25v-.25h.75c.69 0 1.25-.56 1.25-1.25V10h1.01a.75.75 0 0 0 .53-.22l.09-.09.08-.04A4 4 0 0 0 6.5 5.5zM9 5.5a1 1 0 1 1 2 0 1 1 0 0 1-2 0z">
+            </path>
           </svg>
           Bind API Key
         </button>
 
       </div>
-    <% } else { %>
-      <% function dollars(cents){ return `$${((cents||0)/100).toFixed(2)}` } %>
-      <% function formatUsage(value, isTrae) { return isTrae ? value : dollars(value); } %>
-      <% function fmtExpire(ts) { if(!ts){return '' ;} const d=new Date(Number(ts)); const
-        mm=String(d.getMonth()+1).padStart(2,'0'); const dd=String(d.getDate()).padStart(2,'0'); const
-        hh=String(d.getHours()).padStart(2,'0'); const mi=String(d.getMinutes()).padStart(2,'0'); return `${mm}-${dd}
-        ${hh}:${mi}`; } %>
+      <% } else { %>
+        <% function dollars(cents){ return `$${((cents||0)/100).toFixed(2)}` } %>
+          <% function formatUsage(value, isTrae) { return isTrae ? value : dollars(value); } %>
+            <% function fmtExpire(ts) { if(!ts){return '' ;} const d=new Date(Number(ts)); const
+              mm=String(d.getMonth()+1).padStart(2,'0'); const dd=String(d.getDate()).padStart(2,'0'); const
+              hh=String(d.getHours()).padStart(2,'0'); const mi=String(d.getMinutes()).padStart(2,'0'); return
+              `${mm}-${dd} ${hh}:${mi}`; } %>
 
-      <!-- Bound API Keys with Statistics -->
-      <div class="section">
-        <h2 style="margin-bottom: 16px;">Bound API Keys (<%= keys.length %>)</h2>
+              <!-- Bound API Keys with Statistics -->
+              <div class="section">
+                <h2 style="margin-bottom: 16px;">Bound API Keys (<%= keys.length %>)</h2>
 
-        <% keys.forEach(k => { %>
-          <div class="key-section">
-            <!-- Key Header -->
-            <div class="key-card">
-              <div class="key-info">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <% if (k.app_logo) { %>
-                    <img src="<%= k.app_logo %>" alt="<%= k.app_name %>" style="width: 20px; height: 20px; border-radius: 4px;" />
-                  <% } %>
-                  <span class="key-value"><%= k.email || k.api_key.substring(0, 16) + '...' %></span>
-                </div>
-                <span class="key-meta">
-                  API Key: <%= k.api_key.substring(0, 8) %>... | 
-                  <% if (k.app_name) { %>App: <%= k.app_name %> | <% } %>
-                  Created: <%= new Date(k.created_at).toLocaleDateString() %>
-                  <% if (k.online) { %>
-                    | <span style="color: #2da44e;">● Online</span>
-                  <% } %>
-                </span>
-              </div>
-              <div class="key-actions">
-                <button type="button" class="toggle-public <%= k.is_public ? 'public' : '' %>" data-key="<%= k.api_key %>">
-                  <svg class="octicon" viewBox="0 0 16 16" width="14" height="14">
-                    <% if (k.is_public) { %>
-                      <path d="M8 2c1.981 0 3.671.992 4.933 2.078 1.27 1.091 2.187 2.345 2.637 3.023a1.62 1.62 0 0 1 0 1.798c-.45.678-1.367 1.932-2.637 3.023C11.67 13.008 9.981 14 8 14c-1.981 0-3.671-.992-4.933-2.078C1.797 10.831.88 9.577.43 8.899a1.62 1.62 0 0 1 0-1.798c.45-.678 1.367-1.932 2.637-3.023C4.33 2.992 6.019 2 8 2ZM1.679 7.932a.12.12 0 0 0 0 .136c.411.622 1.241 1.75 2.366 2.717C5.176 11.758 6.527 12.5 8 12.5c1.473 0 2.825-.742 3.955-1.715 1.124-.967 1.954-2.096 2.366-2.717a.12.12 0 0 0 0-.136c-.412-.621-1.242-1.75-2.366-2.717C10.824 4.242 9.473 3.5 8 3.5c-1.473 0-2.825.742-3.955 1.715-1.124.967-1.954 2.096-2.366 2.717ZM8 10a2 2 0 1 1-.001-3.999A2 2 0 0 1 8 10Z"></path>
-                    <% } else { %>
-                      <path d="M.143 2.31a.75.75 0 0 1 1.047-.167l14.5 10.5a.75.75 0 1 1-.88 1.214l-2.248-1.628C11.346 13.19 9.792 14 8 14c-1.981 0-3.67-.992-4.933-2.078C1.797 10.83.88 9.576.43 8.898a1.62 1.62 0 0 1 0-1.797c.353-.533 1.043-1.503 1.999-2.478L.31 3.357a.75.75 0 0 1-.167-1.047Zm6.066 4.391a2 2 0 0 0 2.887 2.7l-2.887-2.7Zm7.23 5.24-1.523-1.102c.552-.482 1.043-1.007 1.448-1.485a.12.12 0 0 0 0-.136 10.847 10.847 0 0 0-1.9-2.181c-.959-.843-2.11-1.537-3.464-1.537-1.353 0-2.505.694-3.464 1.537-.36.316-.694.657-.999 1.004L2.68 6.078c.978-.988 1.709-1.976 2.083-2.56C6.018 2.494 7.039 2 8 2c1.981 0 3.67.992 4.933 2.078 1.27 1.091 2.187 2.345 2.637 3.023a1.62 1.62 0 0 1 0 1.798c-.377.567-1.083 1.487-2.031 2.442Z"></path>
-                    <% } %>
-                  </svg>
-                  <%= k.is_public ? 'Public' : 'Private' %>
-                </button>
-                <button type="button" class="unbind-btn" data-key="<%= k.api_key %>">
-                  Unbind
-                </button>
-              </div>
-            </div>
-
-            <!-- Key Statistics -->
-            <div class="key-stats">
-              <div class="usage-layout">
-                <div class="usage-left">
-                  <% if (k.usage) { %>
-                    <div class="usage-card">
-                      <div class="usage-row">
-                        <span style="color: #57606a;">Plan</span>
-                        <span class="tag <%= k.usage.membership_type === 'pro' ? 'pro' : (k.usage.membership_type === 'business' ? 'business' : '') %>">
-                          <%= k.usage.membership_type || 'Free' %>
+                <% keys.forEach(k=> { %>
+                  <div class="key-section">
+                    <!-- Key Header -->
+                    <div class="key-card">
+                      <div class="key-info">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <% if (k.app_logo) { %>
+                            <img src="<%= k.app_logo %>" alt="<%= k.app_name %>"
+                              style="width: 20px; height: 20px; border-radius: 4px;" />
+                            <% } %>
+                              <span class="key-value">
+                                <%= k.email || k.api_key.substring(0, 16) + '...' %>
+                              </span>
+                        </div>
+                        <span class="key-meta">
+                          API Key: <%= k.api_key.substring(0, 8) %>... |
+                            <% if (k.app_name) { %>App: <%= k.app_name %> | <% } %>
+                                  Created: <%= new Date(k.created_at).toLocaleDateString() %>
+                                    <% if (k.online) { %>
+                                      | <span style="color: #2da44e;">● Online</span>
+                                      <% } %>
                         </span>
                       </div>
-                      <div class="usage-row">
-                        <span style="color: #57606a;">Expires</span>
-                        <span><%= fmtExpire(k.usage.expire_time) || 'N/A' %></span>
-                      </div>
-                      <div class="usage-row">
-                        <span style="color: #57606a;">Total</span>
-                        <span><%= formatUsage(k.usage.total_usage, k.is_trae) %></span>
-                      </div>
-                      <div class="usage-row">
-                        <span style="color: #57606a;">Used</span>
-                        <span><%= formatUsage(k.usage.used_usage, k.is_trae) %></span>
-                      </div>
-                      <% if (k.usage.bonus_usage && k.usage.bonus_usage > 0) { %>
-                      <div class="usage-row">
-                        <span style="color: #57606a;">Bonus</span>
-                        <span style="color: #f97316;">+<%= formatUsage(k.usage.bonus_usage, k.is_trae) %></span>
-                      </div>
-                      <% } %>
-                      <div class="usage-row">
-                        <span style="color: #57606a;">Remaining</span>
-                        <span class="strong"><%= formatUsage(k.usage.remaining_usage, k.is_trae) %></span>
-                      </div>
-                      <% const pct=k.usage.total_usage>0 ? Math.min(100, Math.round((k.usage.used_usage/k.usage.total_usage)*100)) : 0; %>
-                      <% const progressClass=pct >= 90 ? 'danger' : (pct >= 70 ? 'warning' : ''); %>
-                      <div class="progress <%= progressClass %>">
-                        <div class="bar" style="--w: <%= pct %>%"></div>
-                      </div>
-                      <div style="margin-top: 8px; font-size: 12px; color: #57606a; text-align: right;">
-                        <%= pct %>% used
+                      <div class="key-actions">
+                        <button type="button" class="toggle-public <%= k.is_public ? 'public' : '' %>"
+                          data-key="<%= k.api_key %>">
+                          <svg class="octicon" viewBox="0 0 16 16" width="14" height="14">
+                            <% if (k.is_public) { %>
+                              <path
+                                d="M8 2c1.981 0 3.671.992 4.933 2.078 1.27 1.091 2.187 2.345 2.637 3.023a1.62 1.62 0 0 1 0 1.798c-.45.678-1.367 1.932-2.637 3.023C11.67 13.008 9.981 14 8 14c-1.981 0-3.671-.992-4.933-2.078C1.797 10.831.88 9.577.43 8.899a1.62 1.62 0 0 1 0-1.798c.45-.678 1.367-1.932 2.637-3.023C4.33 2.992 6.019 2 8 2ZM1.679 7.932a.12.12 0 0 0 0 .136c.411.622 1.241 1.75 2.366 2.717C5.176 11.758 6.527 12.5 8 12.5c1.473 0 2.825-.742 3.955-1.715 1.124-.967 1.954-2.096 2.366-2.717a.12.12 0 0 0 0-.136c-.412-.621-1.242-1.75-2.366-2.717C10.824 4.242 9.473 3.5 8 3.5c-1.473 0-2.825.742-3.955 1.715-1.124.967-1.954 2.096-2.366 2.717ZM8 10a2 2 0 1 1-.001-3.999A2 2 0 0 1 8 10Z">
+                              </path>
+                              <% } else { %>
+                                <path
+                                  d="M.143 2.31a.75.75 0 0 1 1.047-.167l14.5 10.5a.75.75 0 1 1-.88 1.214l-2.248-1.628C11.346 13.19 9.792 14 8 14c-1.981 0-3.67-.992-4.933-2.078C1.797 10.83.88 9.576.43 8.898a1.62 1.62 0 0 1 0-1.797c.353-.533 1.043-1.503 1.999-2.478L.31 3.357a.75.75 0 0 1-.167-1.047Zm6.066 4.391a2 2 0 0 0 2.887 2.7l-2.887-2.7Zm7.23 5.24-1.523-1.102c.552-.482 1.043-1.007 1.448-1.485a.12.12 0 0 0 0-.136 10.847 10.847 0 0 0-1.9-2.181c-.959-.843-2.11-1.537-3.464-1.537-1.353 0-2.505.694-3.464 1.537-.36.316-.694.657-.999 1.004L2.68 6.078c.978-.988 1.709-1.976 2.083-2.56C6.018 2.494 7.039 2 8 2c1.981 0 3.67.992 4.933 2.078 1.27 1.091 2.187 2.345 2.637 3.023a1.62 1.62 0 0 1 0 1.798c-.377.567-1.083 1.487-2.031 2.442Z">
+                                </path>
+                                <% } %>
+                          </svg>
+                          <%= k.is_public ? 'Public' : 'Private' %>
+                        </button>
+                        <button type="button" class="unbind-btn" data-key="<%= k.api_key %>">
+                          Unbind
+                        </button>
                       </div>
                     </div>
-                  <% } else { %>
-                    <div class="usage-card">
-                      <div class="empty-state" style="padding: 24px;">
-                        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-                        </svg>
-                        <p style="margin-top: 8px; font-size: 13px;">No usage data yet</p>
-                      </div>
-                    </div>
-                  <% } %>
-                </div>
-                <div class="usage-right">
-                  <div class="usage-card">
-                    <div style="font-size: 12px; color: #57606a; margin-bottom: 8px;">Usage Trend (30 days)</div>
-                    <% if (k.trend && k.trend.length) { %>
-                      <% const W=480, H=160, P=24; const max=k.maxVal || 1; const stepX=(W - P*2) / (k.trend.length - 1);
-                        function y(v){ return H - P - (v/max)*(H - P*2); } %>
-                      <svg width="100%" height="<%= H %>" viewBox="0 0 <%= W %> <%= H %>" class="chart" preserveAspectRatio="xMidYMid meet">
-                        <!-- Grid lines -->
-                        <line x1="<%= P %>" y1="<%= P %>" x2="<%= P %>" y2="<%= H - P %>" stroke="#eaeef2" stroke-width="1" />
-                        <line x1="<%= P %>" y1="<%= H - P %>" x2="<%= W - P %>" y2="<%= H - P %>" stroke="#eaeef2" stroke-width="1" />
 
-                        <!-- Area fill -->
-                        <path fill="rgba(9, 105, 218, 0.1)" d="
+                    <!-- Key Statistics -->
+                    <div class="key-stats">
+                      <div class="usage-layout">
+                        <div class="usage-left">
+                          <% if (k.usage) { %>
+                            <div class="usage-card">
+                              <div class="usage-row">
+                                <span style="color: #57606a;">Plan</span>
+                                <span
+                                  class="tag <%= k.usage.membership_type === 'pro' ? 'pro' : (k.usage.membership_type === 'business' ? 'business' : '') %>">
+                                  <%= k.usage.membership_type || 'Free' %>
+                                </span>
+                              </div>
+                              <div class="usage-row">
+                                <span style="color: #57606a;">Expires</span>
+                                <span>
+                                  <%= fmtExpire(k.usage.expire_time) || 'N/A' %>
+                                </span>
+                              </div>
+                              <div class="usage-row">
+                                <span style="color: #57606a;">Total</span>
+                                <span>
+                                  <%= formatUsage(k.usage.total_usage, k.is_trae) %>
+                                </span>
+                              </div>
+                              <div class="usage-row">
+                                <span style="color: #57606a;">Used</span>
+                                <span>
+                                  <%= formatUsage(k.usage.used_usage, k.is_trae) %>
+                                </span>
+                              </div>
+                              <% if (k.usage.bonus_usage && k.usage.bonus_usage> 0) { %>
+                                <div class="usage-row">
+                                  <span style="color: #57606a;">Bonus</span>
+                                  <span style="color: #f97316;">+<%= formatUsage(k.usage.bonus_usage, k.is_trae) %>
+                                  </span>
+                                </div>
+                                <% } %>
+                                  <div class="usage-row">
+                                    <span style="color: #57606a;">Remaining</span>
+                                    <span class="strong">
+                                      <%= formatUsage(k.usage.remaining_usage, k.is_trae) %>
+                                    </span>
+                                  </div>
+                                  <% const pct=k.usage.total_usage>0 ? Math.min(100,
+                                    Math.round((k.usage.used_usage/k.usage.total_usage)*100)) : 0; %>
+                                    <% const progressClass=pct>= 90 ? 'danger' : (pct >= 70 ? 'warning' : ''); %>
+                                      <div class="progress <%= progressClass %>">
+                                        <div class="bar" style="--w: <%= pct %>%"></div>
+                                      </div>
+                                      <div style="margin-top: 8px; font-size: 12px; color: #57606a; text-align: right;">
+                                        <%= pct %>% used
+                                      </div>
+                            </div>
+                            <% } else { %>
+                              <div class="usage-card">
+                                <div class="empty-state" style="padding: 24px;">
+                                  <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor"
+                                    stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                                  </svg>
+                                  <p style="margin-top: 8px; font-size: 13px;">No usage data yet</p>
+                                </div>
+                              </div>
+                              <% } %>
+                        </div>
+                        <div class="usage-right">
+                          <div class="usage-card">
+                            <div style="font-size: 12px; color: #57606a; margin-bottom: 8px;">Usage Trend (30 days)
+                            </div>
+                            <% if (k.trend && k.trend.length) { %>
+                              <% const W=480, H=160, P=24; const max=k.maxVal || 1; const stepX=(W - P*2) /
+                                (k.trend.length - 1); function y(v){ return H - P - (v/max)*(H - P*2); } %>
+                                <svg width="100%" height="<%= H %>" viewBox="0 0 <%= W %> <%= H %>" class="chart"
+                                  preserveAspectRatio="xMidYMid meet">
+                                  <!-- Grid lines -->
+                                  <line x1="<%= P %>" y1="<%= P %>" x2="<%= P %>" y2="<%= H - P %>" stroke="#eaeef2"
+                                    stroke-width="1" />
+                                  <line x1="<%= P %>" y1="<%= H - P %>" x2="<%= W - P %>" y2="<%= H - P %>"
+                                    stroke="#eaeef2" stroke-width="1" />
+
+                                  <!-- Area fill -->
+                                  <path fill="rgba(9, 105, 218, 0.1)" d="
                           M <%= P %>,<%= H - P %>
                           <% for(let i=0;i<k.trend.length;i++){ %>
                             L <%= (P + i*stepX).toFixed(1) %>,<%= y(k.trend[i].value).toFixed(1) %>
@@ -351,44 +385,51 @@
                           Z
                         " />
 
-                        <!-- Line -->
-                        <polyline fill="none" stroke="#0969da" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="
+                                  <!-- Line -->
+                                  <polyline fill="none" stroke="#0969da" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" points="
                           <% for(let i=0;i<k.trend.length;i++){ %>
                             <%= (P + i*stepX).toFixed(1) %>,<%= y(k.trend[i].value).toFixed(1) %>
                           <% } %>
                         " />
 
-                        <!-- Data points -->
-                        <% for(let i=0;i<k.trend.length;i++){ %>
-                          <circle cx="<%= (P + i*stepX).toFixed(1) %>" cy="<%= y(k.trend[i].value).toFixed(1) %>" r="2" fill="#0969da" />
-                        <% } %>
+                                  <!-- Data points -->
+                                  <% for(let i=0;i<k.trend.length;i++){ %>
+                                    <circle cx="<%= (P + i*stepX).toFixed(1) %>"
+                                      cy="<%= y(k.trend[i].value).toFixed(1) %>" r="2" fill="#0969da" />
+                                    <% } %>
 
-                        <!-- X-axis labels -->
-                        <% for(let i=0;i<k.trend.length;i+=Math.ceil(k.trend.length/6)){ %>
-                          <text x="<%= (P + i*stepX).toFixed(1) %>" y="<%= H - 6 %>" font-size="9" fill="#57606a" text-anchor="middle">
-                            <%= k.trend[i].label %>
-                          </text>
-                        <% } %>
+                                      <!-- X-axis labels -->
+                                      <% for(let i=0;i<k.trend.length;i+=Math.ceil(k.trend.length/6)){ %>
+                                        <text x="<%= (P + i*stepX).toFixed(1) %>" y="<%= H - 6 %>" font-size="9"
+                                          fill="#57606a" text-anchor="middle">
+                                          <%= k.trend[i].label %>
+                                        </text>
+                                        <% } %>
 
-                        <!-- Max value label -->
-                        <text x="<%= W - P %>" y="<%= P - 4 %>" text-anchor="end" font-size="10" fill="#24292f" font-weight="500">Max: <%= formatUsage(max, k.is_trae) %></text>
-                      </svg>
-                    <% } else { %>
-                      <div class="empty-state" style="padding: 24px;">
-                        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#d0d7de" stroke-width="1.5">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
-                        </svg>
-                        <p style="margin-top: 8px; font-size: 13px; color: #57606a;">No trend data</p>
+                                          <!-- Max value label -->
+                                          <text x="<%= W - P %>" y="<%= P - 4 %>" text-anchor="end" font-size="10"
+                                            fill="#24292f" font-weight="500">Max: <%= formatUsage(max, k.is_trae) %>
+                                          </text>
+                                </svg>
+                                <% } else { %>
+                                  <div class="empty-state" style="padding: 24px;">
+                                    <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#d0d7de"
+                                      stroke-width="1.5">
+                                      <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
+                                    </svg>
+                                    <p style="margin-top: 8px; font-size: 13px; color: #57606a;">No trend data</p>
+                                  </div>
+                                  <% } %>
+                          </div>
+                        </div>
                       </div>
-                    <% } %>
+                    </div>
                   </div>
-                </div>
+                  <% }) %>
               </div>
-            </div>
-          </div>
-        <% }) %>
-      </div>
-    <% } %>
+              <% } %>
   </div>
 
   <!-- Bind API Key Modal -->
@@ -396,9 +437,11 @@
     <div class="modal">
       <div class="modal-title">Bind API Key</div>
       <div class="modal-desc">
-        Enter your Client API Key from the Cursor Usage extension. You can find it in Cursor Settings → Extensions → Cursor Usage → Client API Key, or use the "Copy Client API Key" command.
+        Enter your Client API Key from the Cursor Usage extension. You can find it in Cursor Settings → Extensions →
+        Cursor Usage → Client API Key, or use the "Copy Client API Key" command.
       </div>
-      <input type="text" class="modal-input" id="apiKeyInput" placeholder="ck_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" maxlength="35" />
+      <input type="text" class="modal-input" id="apiKeyInput" placeholder="ck_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        maxlength="35" />
       <div class="modal-error" id="bindError"></div>
       <div class="modal-actions">
         <button type="button" class="btn" id="cancelBind">Cancel</button>
@@ -424,7 +467,7 @@
       function saveBoundApiKeys(keys) {
         localStorage.setItem(API_KEYS_STORAGE_KEY, JSON.stringify(keys));
         // 同步到 cookie 以便服务端读取
-        document.cookie = `boundApiKeys=${encodeURIComponent(JSON.stringify(keys))};path=/;max-age=${365*24*60*60}`;
+        document.cookie = `boundApiKeys=${encodeURIComponent(JSON.stringify(keys))};path=/;max-age=${365 * 24 * 60 * 60}`;
       }
 
       function addBoundApiKey(apiKey) {
@@ -501,9 +544,9 @@
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ api_key: apiKey })
             });
-            
+
             const data = await res.json();
-            
+
             if (res.ok) {
               // 保存到本地存储
               addBoundApiKey(apiKey);
@@ -535,7 +578,7 @@
             const res = await fetch('<%= basePath %>/toggle-public', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ 
+              body: JSON.stringify({
                 api_key: apiKey,
                 bound_keys: getBoundApiKeys()
               })
@@ -554,7 +597,7 @@
         btn.addEventListener('click', async () => {
           const apiKey = btn.getAttribute('data-key');
           if (!confirm('Are you sure you want to unbind this API Key?')) return;
-          
+
           // 从本地存储移除
           removeBoundApiKey(apiKey);
           window.location.reload();

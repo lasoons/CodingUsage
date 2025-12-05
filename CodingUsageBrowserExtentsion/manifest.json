@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Trae Usage Token Extractor",
-  "version": "1.2.5",
+  "version": "1.3.0",
   "description": "Automatically extract and copy session tokens from Cursor and Trae for seamless IDE integration.",
   "permissions": [
     "activeTab",
