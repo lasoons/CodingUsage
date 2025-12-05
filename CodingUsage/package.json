@@ -1,0 +1,99 @@
+{
+  "name": "coding-usage",
+  "displayName": "Coding Usage",
+  "description": "Share Cursor/Trae usage statistics with your team",
+  "version": "1.0.0",
+  "publisher": "wangyudong03",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wangyudong03/CodingUsageForTeam.git"
+  },
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "icon": "img/logo_256.png",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "cursorUsage.refresh",
+        "title": "Cursor Usage: Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "cursorUsage.updateSession",
+        "title": "Cursor Usage: Update Session Token",
+        "icon": "$(settings-gear)"
+      },
+      {
+        "command": "cursorUsage.showOutput",
+        "title": "Cursor Usage: Show Output",
+        "icon": "$(output)"
+      },
+      {
+        "command": "cursorUsage.regenerateApiKey",
+        "title": "Cursor Usage: Regenerate Client API Key",
+        "icon": "$(key)"
+      },
+      {
+        "command": "cursorUsage.copyApiKey",
+        "title": "Cursor Usage: Copy Client API Key",
+        "icon": "$(copy)"
+      }
+    ],
+    "configuration": {
+      "title": "Cursor Usage",
+      "properties": {
+        "cursorUsage.sessionToken": {
+          "type": "string",
+          "default": "",
+          "description": "Session token for authentication (WorkosCursorSessionToken for Cursor, X-Cloudide-Session for Trae)"
+        },
+        "cursorUsage.teamServerUrl": {
+          "type": "string",
+          "default": "",
+          "description": "Team server base URL for usage reporting"
+        },
+        "cursorUsage.clientApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Auto-generated client API key (based on hostname and MAC address). Use 'Cursor Usage: Regenerate Client API Key' command to regenerate.",
+          "readOnly": true
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "package": "node esbuild.js"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "16.x",
+    "@types/sql.js": "^1.4.9",
+    "@types/vscode": "^1.74.0",
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
+    "esbuild": "^0.19.0",
+    "esbuild-plugin-copy": "^2.1.1",
+    "eslint": "^8.28.0",
+    "typescript": "^4.9.4"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "fs-extra": "^11.1.1",
+    "sql.js": "^1.9.0"
+  }
+}

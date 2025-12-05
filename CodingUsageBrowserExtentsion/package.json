@@ -1,0 +1,27 @@
+{
+  "name": "trae-usage-web-extension",
+  "version": "1.2",
+  "description": "Chrome extension to extract X-Cloudide-Session from Trae.ai",
+  "scripts": {
+    "build": "echo 'Building extension...'",
+    "package": "zip -r TraeUsageWebExtension.zip manifest.json background.js content.js popup.html popup.js icon16.png icon48.png icon128.png"
+  },
+  "keywords": [
+    "chrome-extension",
+    "trae",
+    "session-extractor"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {},
+  "files": [
+    "manifest.json",
+    "background.js",
+    "content.js",
+    "popup.html",
+    "popup.js",
+    "icon16.png",
+    "icon48.png",
+    "icon128.png"
+  ]
+}

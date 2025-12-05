@@ -1,0 +1,61 @@
+name: Build Chrome Extension CRX
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Install dependencies
+      run: |
+        npm install -g crx3
+        
+    - name: Generate private key
+      run: |
+        openssl genrsa -out key.pem 2048
+        
+    - name: Prepare extension files
+      run: |
+        # Create a temporary directory for extension files
+        mkdir -p extension
+        # Copy all extension files to the temp directory
+        cp manifest.json background.js content.js popup.html popup.js *.png extension/
+        
+    - name: Build CRX file
+      run: |
+        crx3 --keyPath=key.pem --crxPath=TraeUsageWebExtension.crx extension/
+        
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          TraeUsageWebExtension.crx
+          TraeUsageWebExtension.zip
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+        
+    - name: Upload CRX as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: chrome-extension-crx
+        path: |
+          TraeUsageWebExtension.crx
+          TraeUsageWebExtension.zip
+        retention-days: 30

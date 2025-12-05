@@ -1,0 +1,78 @@
+name: Build and Release Cursor Usage Extension
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Match version tags, like v1.0.0
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      working-directory: CursorUsage
+        
+    - name: Compile TypeScript
+      run: npm run compile
+      working-directory: CursorUsage
+      
+    - name: Install vsce
+      run: npm install -g vsce
+      
+    - name: Package extension
+      run: vsce package
+      working-directory: CursorUsage
+      
+    - name: Get version from tag
+      id: get_version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ github.ref_name }}
+        name: Release ${{ steps.get_version.outputs.VERSION }}
+        body: |
+          ## Cursor Usage Monitor v${{ steps.get_version.outputs.VERSION }}
+          
+          Monitor your Cursor AI usage statistics directly in VS Code. This extension displays your current billing period usage information in the status bar.
+
+          ### Features
+          - Real-time monitoring of Cursor AI usage
+          - Display of current billing period and usage statistics
+          - Easy configuration through VS Code settings
+        files: |
+          CursorUsage/*.vsix
+        draft: false
+        prerelease: false
+        
+    # Auto-publish to VSCode Marketplace
+    - name: Publish to VSCode Marketplace
+      run: vsce publish -p ${{ secrets.VSCE_PAT }}
+      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+      working-directory: CursorUsage
+      
+    # Auto-publish to OpenVSX Registry
+    - name: Install ovsx
+      run: npm install -g ovsx
+      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+      
+    - name: Publish to OpenVSX Registry
+      run: ovsx publish *.vsix -p ${{ secrets.OVSX_PAT }}
+      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+      working-directory: CursorUsage

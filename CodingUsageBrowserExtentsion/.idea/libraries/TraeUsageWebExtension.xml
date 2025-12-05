@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="TraeUsageWebExtension">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/TraeUsageWebExtension.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

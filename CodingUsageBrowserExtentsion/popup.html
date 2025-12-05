@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      width: 320px;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      background-color: #ffffff;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 8px;
+      letter-spacing: -0.3px;
+    }
+    .subtitle {
+      font-size: 12px;
+      color: #888;
+    }
+    .platform-section {
+      background-color: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .platform-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .platform-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+      margin-right: 10px;
+    }
+    .platform-icon.cursor {
+      background-color: #000000;
+      color: #ffffff;
+    }
+    .platform-icon.trae {
+      background-color: #007bff;
+      color: #ffffff;
+    }
+    .platform-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #333;
+    }
+    .platform-desc {
+      font-size: 12px;
+      color: #666;
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+    .action-btn {
+      color: #ffffff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .action-btn.cursor {
+      background-color: #000000;
+    }
+    .action-btn.cursor:hover {
+      background-color: #333333;
+    }
+    .action-btn.trae {
+      background-color: #007bff;
+    }
+    .action-btn.trae:hover {
+      background-color: #0056b3;
+    }
+    .action-btn:active {
+      transform: scale(0.98);
+    }
+    .help-section {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #e9ecef;
+    }
+    .help-header {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      color: #666;
+      font-size: 13px;
+    }
+    .help-icon {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      background-color: #007bff;
+      color: white;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 18px;
+      font-size: 11px;
+      font-weight: bold;
+      margin-right: 8px;
+    }
+    .help-content {
+      display: none;
+      margin-top: 12px;
+      font-size: 12px;
+      color: #666;
+      line-height: 1.5;
+      background-color: #f8f9fa;
+      padding: 12px;
+      border-radius: 6px;
+    }
+    .help-content.show {
+      display: block;
+    }
+    .help-content strong {
+      color: #333;
+    }
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #28a745;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      opacity: 0;
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(10px);
+    }
+    .toast::before {
+      content: '✓';
+      margin-right: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="title">AI IDE Token Extractor</div>
+    <div class="subtitle">Extract session tokens from AI IDEs</div>
+  </div>
+  
+  <div id="toast" class="toast">Copied to clipboard!</div>
+  
+  <!-- Cursor Section -->
+  <div class="platform-section">
+    <div class="platform-header">
+      <div class="platform-icon cursor">C</div>
+      <div class="platform-name">Cursor</div>
+    </div>
+    <div class="platform-desc">
+      Extract WorkosCursorSessionToken from Cursor dashboard for IDE integration.
+    </div>
+    <button id="cursorBtn" class="action-btn cursor">Go to Cursor Dashboard</button>
+  </div>
+  
+  <!-- Trae Section -->
+  <div class="platform-section">
+    <div class="platform-header">
+      <div class="platform-icon trae">T</div>
+      <div class="platform-name">Trae</div>
+    </div>
+    <div class="platform-desc">
+      Extract X-Cloudide-Session from Trae usage page for IDE integration.
+    </div>
+    <button id="traeBtn" class="action-btn trae">Go to Trae Usage Page</button>
+  </div>
+  
+  <!-- Help Section -->
+  <div class="help-section">
+    <div id="helpHeader" class="help-header">
+      <span class="help-icon">?</span>
+      <span>How does it work?</span>
+    </div>
+    <div id="helpContent" class="help-content">
+      <strong>Instructions:</strong><br>
+      1. Click the button for your AI IDE<br>
+      2. The page will open and extension auto-extracts the token<br>
+      3. Token is automatically copied to clipboard<br>
+      4. Return to your IDE - extensions will auto-update<br><br>
+      <strong>Supported:</strong> Cursor, Trae (more coming soon)
+    </div>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
