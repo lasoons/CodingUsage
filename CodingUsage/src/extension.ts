@@ -18,13 +18,15 @@ import {
   getAppDisplayName,
   getConfig,
   getClientApiKey,
+  setClientApiKey,
   getTeamServerUrl,
   getClipboardTokenPattern,
   getDbMonitorKey,
   getBrowserExtensionUrl,
   getDashboardUrl,
   BrowserType,
-  isReportingEnabled
+  isReportingEnabled,
+  setLastAccountId
 } from './utils';
 import { 
   getApiService, 
@@ -33,7 +35,7 @@ import {
   TraeApiResponse,
   TraeEntitlementPack
 } from './apiService';
-import { ServerDiscovery, TeamServerClient, PingManager } from './teamServerClient';
+import { ServerDiscovery, TeamServerClient, PingManager, ApiKeyGenerator } from './teamServerClient';
 
 // ==================== 常量定义 ====================
 const APP_NAME = getAppDisplayName();
@@ -937,8 +939,51 @@ class ClipboardMonitor {
         await getApiService().resetTraeToDefaultHost();
       }
       
+      // 立即获取账号信息并更新 Last Account ID 和 API Key
+      await this.updateAccountInfoAndApiKey();
+      
       vscode.window.showInformationMessage('Session token updated automatically.');
       vscode.commands.executeCommand('cursorUsage.refresh');
+    }
+  }
+
+  private async updateAccountInfoAndApiKey(): Promise<void> {
+    try {
+      const sessionToken = getSessionToken();
+      if (!sessionToken) {
+        logWithTime('Session token 不存在，跳过账号信息更新');
+        return;
+      }
+
+      const apiService = getApiService();
+      let accountInfo: string | null = null;
+
+      if (APP_TYPE === 'cursor') {
+        // Cursor 获取邮箱信息
+        const me = await apiService.fetchCursorUserInfo(sessionToken);
+        accountInfo = me.email;
+        logWithTime(`获取到 Cursor 账号信息: ${accountInfo}`);
+      } else if (APP_TYPE === 'trae') {
+        // Trae 获取用户ID信息（传递sessionToken）
+        const traeMe = await apiService.fetchTraeUserInfo(sessionToken);
+        accountInfo = traeMe.userId;
+        logWithTime(`获取到 Trae 账号信息: ${accountInfo}`);
+      }
+
+      if (accountInfo) {
+        // 更新 Last Account ID
+        await setLastAccountId(accountInfo);
+        logWithTime(`Last Account ID 已更新: ${accountInfo}`);
+
+        // 生成新的 API Key
+        const newApiKey = ApiKeyGenerator.generateApiKey(accountInfo);
+        await setClientApiKey(newApiKey);
+        logWithTime(`API Key 已生成: ${newApiKey.substring(0, 11)}...`);
+      } else {
+        logWithTime('无法获取账号信息，跳过更新');
+      }
+    } catch (error) {
+      logWithTime(`更新账号信息时出错: ${error}`);
     }
   }
 

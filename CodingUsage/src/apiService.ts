@@ -294,6 +294,61 @@ export class ApiService {
   }
 
   /**
+   * 获取 Trae 用户信息（使用缓存的 Token）
+   */
+  public async fetchTraeUserInfo(sessionId?: string): Promise<{ userId: string; email?: string }> {
+    try {
+      // 如果没有提供 sessionId，尝试从缓存或配置中获取
+      let currentSessionId = sessionId || this.cachedTraeSessionId;
+      
+      // 如果缓存中没有，尝试从全局配置获取
+      if (!currentSessionId) {
+        const { getSessionToken } = await import('./utils');
+        const configSessionId = getSessionToken();
+        if (configSessionId) {
+          currentSessionId = configSessionId;
+        }
+      }
+
+      if (!currentSessionId) {
+        throw new Error('Session ID not found');
+      }
+
+      // 获取 Trae Token（会更新缓存）
+      const traeToken = await this.getTraeTokenFromSession(currentSessionId);
+      if (!traeToken) {
+        throw new Error('Failed to get Trae token');
+      }
+
+      // 直接从 TraeTokenResponse 接口获取 UserID
+      // 这里我们需要重新调用 API 来获取完整响应
+      const traeTokenResponse = await this.apiRequestWithRetry(async () => {
+        const response = await axios.post<TraeTokenResponse>(
+          `${this.traeCurrentHost}/cloudide/api/v3/common/GetUserToken`,
+          {},
+          {
+            headers: {
+              'Cookie': `X-Cloudide-Session=${currentSessionId}`,
+              'Host': new URL(this.traeCurrentHost).hostname,
+              'Content-Type': 'application/json'
+            },
+            timeout: API_TIMEOUT
+          }
+        );
+        return response.data;
+      }, '获取 Trae 用户 Token 响应');
+
+      return {
+        userId: traeTokenResponse.Result.UserID,
+        email: traeTokenResponse.Result.UserID // Trae 使用 UserID 作为标识符
+      };
+    } catch (error) {
+      logWithTime(`获取 Trae 用户信息失败: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
    * 获取 Trae 用户当前权益列表
    */
   public async getTraeUserEntitlementList(authToken: string): Promise<TraeApiResponse | null> {
