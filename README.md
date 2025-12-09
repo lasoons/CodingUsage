@@ -1,160 +1,91 @@
-# Code Usage
+# Coding Usage
 
-**Complete AI IDE Usage Monitoring Solution** - A comprehensive system for tracking and sharing Cursor/Trae AI usage across teams and communities.
+**轻松的 AI 使用情况追踪** - 无需手动提取 Cookie。此扩展可直接在编辑器中监控您的 Cursor/Trae AI 使用情况，支持团队模式实现多人协作与多账号使用量追踪。
 
-![Code Usage System](docs/banner.png)
+<div align="left">
+  <img src="https://raw.githubusercontent.com/wangyudong03/CodingUsage/refs/heads/main/CodingUsage/img/statebar.png" alt="状态栏配置" width="400">
+</div>
 
-## 🎯 Overview
+当前支持[Cursor](cursor:extension/whyuds.coding-usage)、[Trae国际版](trae:extension/whyuds.coding-usage)
 
-Code Usage is a three-component ecosystem that provides seamless, automatic usage tracking for AI-powered IDEs (Cursor and Trae). From zero-config token extraction to real-time dashboards, monitor your AI usage effortlessly.
+## 配置演示
 
-## 📦 Components
+<div align="center" style="display: flex; gap: 10px; overflow-x: auto; white-space: nowrap;">
+  <img src="https://raw.githubusercontent.com/wangyudong03/CodingUsage/refs/heads/main/CodingUsage/img/standalone.gif" alt="基础配置演示" width="400" style="display: inline-block; flex-shrink: 0;">
+  <img src="https://raw.githubusercontent.com/wangyudong03/CodingUsage/refs/heads/main/CodingUsage/img/teamserver.gif" alt="Team Server 连接演示" width="400" style="display: inline-block; flex-shrink: 0;"> 
+</div>
 
-### 1. [Browser Extension](./CodingUsageBrowserExtension)
-**Automatic Token Extraction**
+<p align="center"><em>基础配置演示 | Team Server 连接演示</em></p>
 
-- Auto-detects and extracts session tokens from Cursor/Trae dashboards
-- One-click copy to clipboard with proper formatting
-- Zero configuration required
-- Available on [Chrome Web Store](https://chromewebstore.google.com/detail/trae-usage-token-extracto/edkpaodbjadikhahggapfilgmfijjhei) and [Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/trae-usage-token-extracto/leopdblngeedggognlgokdlfpiojalji)
+## 功能特性
 
-### 2. [IDE Extension](./CursorUsage)
-**Real-Time Usage Monitoring**
+- **配置设置**：浏览器扩展自动从官网获取令牌，复制到剪贴板，IDE扩展自动读取粘贴板进行配置
+- **秒级使用量更新**：每10秒监控本地与AI对话，仅在对话变更时读取官方使用量API
+- **团队协作**：可选的团队服务器集成，实现共享使用情况追踪
+- **自动发现**：自动查找并配置可用的团队服务器，当前已部署至[演示服务器](http://115.190.183.157:3000/)
+- **使用量显示**：详细的工具提示，包含使用情况明细、进度条和账单周期信息
 
-- Smart sync: checks local changes every 5s, calls API only when needed
-- Visual progress bars in VS Code status bar
-- Auto-generated client API keys from device fingerprint
-- Team server integration support
-- Works with both Cursor and Trae platforms
+## 快速开始
 
-### 3. [Web Dashboard](./tool-cursor-usage-web)
-**Shared Usage Analytics**
+### 1. 安装IDE扩展
+- <a href="cursor:extension/whyuds.coding-usage">Cursor 扩展商店——CodingUsage</a>
+- <a href="trae:extension/whyuds.coding-usage">Trae 扩展商店——CodingUsage</a>
 
-- Public plaza for community usage statistics
-- Personal dashboard for multi-device tracking
-- 30-day usage trend charts
-- Privacy controls (public/private toggle per device)
-- No registration required - bind API keys directly
+### 2. 双击窗口底部状态栏
 
-## 🚀 Quick Start
+<div align="center" style="display: flex; gap: 10px; overflow-x: auto; white-space: nowrap;">
+  <img src="https://raw.githubusercontent.com/wangyudong03/CodingUsage/refs/heads/main/CodingUsage/img/doubleclickconfig.png" alt="双击状态栏配置" width="400" style="display: inline-block; flex-shrink: 0;">
+  <img src="https://raw.githubusercontent.com/wangyudong03/CodingUsage/refs/heads/main/CodingUsage/img/quickpick.png" alt="唤醒QuickPick菜单" width="400" style="display: inline-block; flex-shrink: 0;">
+</div>
 
-### For Individual Users
+<p align="center"><em>双击状态栏配置 | 唤醒QuickPick菜单</em></p>
 
-1. **Install Browser Extension** (optional but recommended)
-   - Chrome: [Install from Web Store](https://chromewebstore.google.com/detail/trae-usage-token-extracto/edkpaodbjadikhahggapfilgmfijjhei)
-   - Edge: [Install from Add-ons](https://microsoftedge.microsoft.com/addons/detail/trae-usage-token-extracto/leopdblngeedggognlgokdlfpiojalji)
+### 3. QuickPick菜单安装浏览器扩展
 
-2. **Install IDE Extension**
-   ```
-   VS Code → Extensions → Search "Coding-Usage"
-   ```
+### 4. 浏览器扩展或QuickPick跳转至官网
 
-3. **Auto-Configure**
-   - Visit cursor.com or trae.ai and log in
-   - Token auto-copied → extension auto-configures
-   - Done! 🎉
+### 5. 返回并自动配置SessionToken
 
-### For Teams
+## 团队功能（可选）
 
-1. **Deploy Web Dashboard**
-   ```bash
-   cd tool-cursor-usage-web
-   npm install
-   npm start
-   ```
+配置团队服务器 URL 以启用：
+- 团队成员间的共享使用情况追踪
+- 历史使用数据和分析
+- 当前在线状态
+- 多账号使用量查询
 
-2. **Configure Team Members**
-   - Share server URL: `http://your-server:3000`
-   - IDE extensions auto-discover and connect
-   - View team usage in web dashboard
+### 个人多账号查询
 
-## 💡 How It Works
+<div align="center" style="display: flex; gap: 10px; overflow-x: auto; white-space: nowrap;">
+  <img src="https://raw.githubusercontent.com/wangyudong03/CodingUsage/refs/heads/main/CodingUsage/img/mystats.png" alt="个人多账号查询" width="400" style="display: inline-block; flex-shrink: 0;">
+  <img src="https://raw.githubusercontent.com/wangyudong03/CodingUsage/refs/heads/main/CodingUsage/img/plza.png" alt="团队账号数据" width="400" style="display: inline-block; flex-shrink: 0;">
+</div>
 
+<p align="center"><em>个人多账号查询 | 团队账号数据</em></p>
+
+## 常见问题
+
+#### Cursor的Pro订阅为什么显示总量45美元？
+目前Pro总使用量为，API计费20美元固定 + 25美元Bonus，Auto计费：150美元
+
+#### 数据多久更新一次？
+扩展每10秒检查一次本地数据库变化，仅在检测到更改时才调用官方API，既保证实时性又避免频繁请求。
+
+#### 团队服务器是必需的吗？
+不是。团队服务器是可选功能，用于团队协作和历史数据追踪，以及个人多账号追踪。
+当前配置服务器仅作为公共演示使用，默认关闭，建议根据投递协议内网部署自己团队服务器。
+
+#### 团队模式的投递数据格式
+
+```json
+{"client_token":"ck_eb33d6fb4d5b541d28a0d042b0e4ba56","email":"aisrv0615@qiyi.com","expire_time":1767060076000,"membership_type":"pro","api_spend":2002,"api_limit":4500,"auto_spend":0,"auto_limit":15000,"host":"IQ275CG42123NJ","platform":"win32","app_name":"Cursor"}
 ```
-┌──────────────┐         ┌──────────────┐         ┌──────────────┐
-│   Browser    │ Token   │     IDE      │  API    │     Web      │
-│  Extension   │────────▶│  Extension   │────────▶│  Dashboard   │
-│              │         │              │         │              │
-└──────────────┘         └──────────────┘         └──────────────┘
-     Auto                     Smart                    Shared
-   Extract                    Sync                   Analytics
-```
 
-1. **Browser Extension**: Extracts session token when you visit dashboard
-2. **IDE Extension**: Monitors usage with intelligent sync (no unnecessary polling)
-3. **Web Dashboard**: Aggregates and displays usage with privacy controls
-
-## ✨ Key Features
-
-### 🎯 Zero Configuration
-- Automatic token extraction from clipboard
-- Auto-generated client API keys (hostname + MAC)
-- Auto-discovery of team servers
-
-### ⚡ Smart Sync
-- Database-driven monitoring (checks local changes every 5s)
-- Only calls API when usage actually changes
-- Minimal network overhead
-
-### 🌐 Multi-Platform
-- Supports both Cursor and Trae AI
-- Cross-platform: Windows, macOS, Linux
-- Multi-device aggregation in dashboard
-
-### 👥 Team Ready
-- Optional team server for shared tracking
-- Public plaza for community statistics
-- Privacy-first: toggle public/private per device
-
-### 📊 Rich Analytics
-- Real-time progress bars in IDE
-- 30-day historical trends
-- Color-coded usage alerts
-- Detailed tooltips with breakdown
-
-## 🛠️ Technology Stack
-
-- **Browser Extension**: Vanilla JS, Chrome Extension APIs
-- **IDE Extension**: TypeScript, VS Code Extension API, SQLite
-- **Web Dashboard**: Node.js, Express, EJS, SQLite
-
-## 📖 Documentation
-
-- [Browser Extension Guide](./CodingUsageBrowserExtension/README.md)
-- [IDE Extension Guide](./CursorUsage/README.md)
-- [Web Dashboard Guide](./tool-cursor-usage-web/README.md)
-
-## 🔐 Privacy & Security
-
-- Client API keys generated from device fingerprint (no server-side secrets)
-- Privacy-first: usage statistics are private by default
-- Optional public sharing with per-device controls
-- No registration required for web dashboard
-- All data stored locally in SQLite (no cloud dependencies)
-
-## 🤝 Contributing
-
-Contributions welcome! Please read our contributing guidelines before submitting PRs.
-
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing`)
-3. Commit changes (`git commit -am 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing`)
-5. Open Pull Request
-
-## 📝 License
-
-MIT License - see LICENSE file for details
-
-## 🌟 Show Your Support
-
-If this project helps you, please give it a ⭐️!
-
-## 📧 Contact
-
-- **Issues**: [GitHub Issues](https://github.com/yourusername/code-usage/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/code-usage/discussions)
+#### 我的令牌安全吗？
+令牌仅存储在本地。扩展不会将您的令牌发送到除官方 API 之外的任何服务器。
 
 ---
 
-**Made with ❤️ for AI developers who want effortless usage tracking** 🚀
+## 支持
+
+如有问题或建议，欢迎提交 [Issue](https://github.com/wangyudong03/CodingUsage/issues) 或 [Pull Request](https://github.com/wangyudong03/CodingUsage/pulls)。

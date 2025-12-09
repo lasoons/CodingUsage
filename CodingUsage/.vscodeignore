@@ -27,7 +27,7 @@ vsc-extension-quickstart.md
 .github
 
 # 资源文件
-img/codeusage.gif
+img/**
 
 # SQL.js 相关文件排除
 # 排除嵌套的 out 目录（sql.js 完整 dist - 不需要）

@@ -1,66 +1,91 @@
 # Coding Usage
 
-**Effortless AI Usage Tracking** - No manual cookie extraction needed. This extension monitors your Cursor/Trae AI usage directly in your editor with automatic configuration and intelligent sync.
+**轻松的 AI 使用情况追踪** - 无需手动提取 Cookie。此扩展可直接在编辑器中监控您的 Cursor/Trae AI 使用情况，支持团队模式实现多人协作与多账号使用量追踪。
 
-![Coding Usage Monitor Demo](img/cursorusage.gif)
+<div align="left">
+  <img src="https://raw.githubusercontent.com/wangyudong03/CodingUsage/refs/heads/main/CodingUsage/img/statebar.png" alt="状态栏配置" width="400">
+</div>
 
-## ✨ Highlights
+当前支持[Cursor](cursor:extension/whyuds.coding-usage)、[Trae国际版](trae:extension/whyuds.coding-usage)
 
-- **🎯 Zero-Configuration Setup**: Browser extension auto-extracts session tokens from clipboard
-- **⚡ Smart Sync**: Database-driven monitoring checks local changes every 5 seconds, only calls API when needed
-- **🌐 Multi-Platform Support**: Works with both Cursor and Trae AI editors
-- **👥 Team Collaboration**: Optional team server integration for shared usage tracking
-- **🔐 Privacy-First**: Client API keys generated from device fingerprint (hostname + MAC)
-- **🔄 Auto-Discovery**: Automatically finds and configures available team servers
-- **📊 Rich Status Display**: Detailed tooltips with usage breakdown, progress bars, and billing cycle info
+## 配置演示
 
-## Features
+<div align="center" style="display: flex; gap: 10px; overflow-x: auto; white-space: nowrap;">
+  <img src="https://raw.githubusercontent.com/wangyudong03/CodingUsage/refs/heads/main/CodingUsage/img/standalone.gif" alt="基础配置演示" width="400" style="display: inline-block; flex-shrink: 0;">
+  <img src="https://raw.githubusercontent.com/wangyudong03/CodingUsage/refs/heads/main/CodingUsage/img/teamserver.gif" alt="Team Server 连接演示" width="400" style="display: inline-block; flex-shrink: 0;"> 
+</div>
 
-- Real-time usage monitoring with smart sync (no unnecessary polling)
-- Visual progress bars and percentage indicators
-- Automatic session token detection from clipboard
-- Team server connectivity with health checks
-- Support for both Cursor and Trae platforms
-- One-click configuration through browser extensions
+<p align="center"><em>基础配置演示 | Team Server 连接演示</em></p>
 
-## Requirements
+## 功能特性
 
-- A Cursor or Trae account
-- Browser extension for automatic token extraction (optional but recommended)
+- **配置设置**：浏览器扩展自动从官网获取令牌，复制到剪贴板，IDE扩展自动读取粘贴板进行配置
+- **秒级使用量更新**：每10秒监控本地与AI对话，仅在对话变更时读取官方使用量API
+- **团队协作**：可选的团队服务器集成，实现共享使用情况追踪
+- **自动发现**：自动查找并配置可用的团队服务器，当前已部署至[演示服务器](http://115.190.183.157:3000/)
+- **使用量显示**：详细的工具提示，包含使用情况明细、进度条和账单周期信息
 
-## Extension Settings
+## 快速开始
 
-* `cursorUsage.sessionToken`: Session token (auto-configured via browser extension)
-* `cursorUsage.teamServerUrl`: Team server URL (auto-discovered from server list)
-* `cursorUsage.clientApiKey`: Auto-generated device identifier (read-only)
+### 1. 安装IDE扩展
+- <a href="cursor:extension/whyuds.coding-usage">Cursor 扩展商店——CodingUsage</a>
+- <a href="trae:extension/whyuds.coding-usage">Trae 扩展商店——CodingUsage</a>
 
-## Quick Start
+### 2. 双击窗口底部状态栏
 
-### Automatic Setup
-1. Install the browser extension:
-   - [Chrome Web Store](https://chromewebstore.google.com/detail/trae-usage-token-extracto/edkpaodbjadikhahggapfilgmfijjhei)
-   - [Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/trae-usage-token-extracto/leopdblngeedggognlgokdlfpiojalji)
-2. Visit cursor.com or trae.ai and log in
-3. Token auto-copied to clipboard → extension auto-configures
-4. Done! 🎉
+<div align="center" style="display: flex; gap: 10px; overflow-x: auto; white-space: nowrap;">
+  <img src="https://raw.githubusercontent.com/wangyudong03/CodingUsage/refs/heads/main/CodingUsage/img/doubleclickconfig.png" alt="双击状态栏配置" width="400" style="display: inline-block; flex-shrink: 0;">
+  <img src="https://raw.githubusercontent.com/wangyudong03/CodingUsage/refs/heads/main/CodingUsage/img/quickpick.png" alt="唤醒QuickPick菜单" width="400" style="display: inline-block; flex-shrink: 0;">
+</div>
 
-## Usage
+<p align="center"><em>双击状态栏配置 | 唤醒QuickPick菜单</em></p>
 
-- **Single Click**: Refresh usage data
-- **Double Click**: Open configuration menu
-- **Status Bar**: Shows real-time usage with color-coded alerts
+### 3. QuickPick菜单安装浏览器扩展
 
-## Team Features (Optional)
+### 4. 浏览器扩展或QuickPick跳转至官网
 
-Configure team server URL to enable:
-- Shared usage tracking across team members
-- Historical usage data and analytics
-- Automated ping for connection status
+### 5. 返回并自动配置SessionToken
 
-## License
+## 团队功能（可选）
 
-MIT
+配置团队服务器 URL 以启用：
+- 团队成员间的共享使用情况追踪
+- 历史使用数据和分析
+- 当前在线状态
+- 多账号使用量查询
+
+### 个人多账号查询
+
+<div align="center" style="display: flex; gap: 10px; overflow-x: auto; white-space: nowrap;">
+  <img src="https://raw.githubusercontent.com/wangyudong03/CodingUsage/refs/heads/main/CodingUsage/img/mystats.png" alt="个人多账号查询" width="400" style="display: inline-block; flex-shrink: 0;">
+  <img src="https://raw.githubusercontent.com/wangyudong03/CodingUsage/refs/heads/main/CodingUsage/img/plza.png" alt="团队账号数据" width="400" style="display: inline-block; flex-shrink: 0;">
+</div>
+
+<p align="center"><em>个人多账号查询 | 团队账号数据</em></p>
+
+## 常见问题
+
+#### Cursor的Pro订阅为什么显示总量45美元？
+目前Pro总使用量为，API计费20美元固定 + 25美元Bonus，Auto计费：150美元
+
+#### 数据多久更新一次？
+扩展每10秒检查一次本地数据库变化，仅在检测到更改时才调用官方API，既保证实时性又避免频繁请求。
+
+#### 团队服务器是必需的吗？
+不是。团队服务器是可选功能，用于团队协作和历史数据追踪，以及个人多账号追踪。
+当前配置服务器仅作为公共演示使用，默认关闭，建议根据投递协议内网部署自己团队服务器。
+
+#### 团队模式的投递数据格式
+
+```json
+{"client_token":"ck_eb33d6fb4d5b541d28a0d042b0e4ba56","email":"aisrv0615@qiyi.com","expire_time":1767060076000,"membership_type":"pro","api_spend":2002,"api_limit":4500,"auto_spend":0,"auto_limit":15000,"host":"IQ275CG42123NJ","platform":"win32","app_name":"Cursor"}
+```
+
+#### 我的令牌安全吗？
+令牌仅存储在本地。扩展不会将您的令牌发送到除官方 API 之外的任何服务器。
 
 ---
 
-**Note**: This extension works with both Cursor and Trae AI editors, automatically detecting your platform.
+## 支持
+
+如有问题或建议，欢迎提交 [Issue](https://github.com/wangyudong03/CodingUsage/issues) 或 [Pull Request](https://github.com/wangyudong03/CodingUsage/pulls)。
