@@ -12,12 +12,10 @@
 
 ## 配置演示
 
-<div align="center" style="display: flex; gap: 10px; overflow-x: auto; white-space: nowrap;">
-  <img src="https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/standalone.gif" alt="基础配置演示" width="400" style="display: inline-block; flex-shrink: 0;">
-  <img src="https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/teamserver.gif" alt="Team Server 连接演示" width="400" style="display: inline-block; flex-shrink: 0;"> 
+<div align="left">
+  <img src="https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/standalone.gif" alt="基础配置演示" width="600" style="display: inline-block; flex-shrink: 0;">
 </div>
-
-<p align="center"><em>基础配置演示 | Team Server 连接演示</em></p>
+<p align="left"><em>基础配置演示</em></p>
 
 ## 功能特性
 
@@ -64,6 +62,15 @@
 </div>
 
 <p align="center"><em>个人多账号查询 | 团队账号数据</em></p>
+
+### 配置演示
+
+<div align="left">
+  <img src="https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/teamserver.gif" alt="Team Server 连接演示" width="600" style="display: inline-block; flex-shrink: 0;"> 
+</div>
+
+<p align="left"><em>Team Server 连接演示</em></p>
+
 
 ## 常见问题
 
