@@ -159,8 +159,8 @@ async function init() {
 async function getOrCreateApiKeyRecord(apiKey, email, platform, appName) {
   let record = await get(`SELECT * FROM vibe_usage_api_keys WHERE api_key = ?`, [apiKey]);
   if (!record) {
-    // 默认设置 is_public 为 1（公开）
-    await run(`INSERT INTO vibe_usage_api_keys (api_key, email, platform, app_name, created_at, is_public) VALUES (?, ?, ?, ?, ?, 1)`,
+    // 默认私有：避免未投递使用数据/缺少用户信息时出现在广场里（Unknown）
+    await run(`INSERT INTO vibe_usage_api_keys (api_key, email, platform, app_name, created_at, is_public) VALUES (?, ?, ?, ?, ?, 0)`,
       [apiKey, email || '', platform || '', appName || '', Date.now()]);
     record = await get(`SELECT * FROM vibe_usage_api_keys WHERE api_key = ?`, [apiKey]);
   } else {
@@ -599,8 +599,11 @@ app.post('/api/ping', async (req, res) => {
 
   const active = typeof b.active !== 'undefined' ? !!b.active : true;
 
-  // 确保记录存在
-  await getOrCreateApiKeyRecord(apiKey, null, null);
+  // 只允许更新已存在的 key：避免仅 ping（未开启投递/未上报 usage）就创建记录，导致 Unknown 在线用户出现在广场
+  const existing = await get(`SELECT api_key FROM vibe_usage_api_keys WHERE api_key = ?`, [apiKey]);
+  if (!existing) {
+    return res.status(404).json({ error: 'API Key not found. Report usage at least once before ping.' });
+  }
 
   await run(`UPDATE vibe_usage_api_keys SET last_ping_at = ?, online = ? WHERE api_key = ?`, [Date.now(), active ? 1 : 0, apiKey]);
   res.json({ ok: true });
