@@ -1,11 +1,12 @@
 # Coding Usage
 
-**Easy AI Usage Tracking** - No manual cookie extraction needed. This extension monitors your Cursor/Trae AI usage directly in the editor, with team mode support for multi-user collaboration and multi-account usage tracking.
+No need to manually extract Cookies - monitor your Cursor/Trae AI usage, with support for remote data delivery to your self-hosted server.
+Current Cursor usage rules: Basic $20 API usage + official Bonus usage provided by Cursor (currently $25) + Auto usage (currently $150). When the official statistics show "You've hit your usage limit", it only indicates that the basic $20 API usage has been exhausted (this is currently a Cursor statistics bug that incorrectly includes Auto usage in the count).
 
 **English Version | [中文版](README.md)**
 
 <div align="left">
-  <img src="https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/statebar.png" alt="Status Bar Configuration" width="400">
+  <img src="https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/statebar.jpg" alt="Status Bar Configuration" width="400">
 </div>
 
 Currently supports [Cursor](cursor:extension/whyuds.coding-usage) and [Trae International](trae:extension/whyuds.coding-usage)

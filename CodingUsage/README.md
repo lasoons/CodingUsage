@@ -1,11 +1,12 @@
 # Coding Usage
 
-**轻松的 AI 使用情况追踪** - 无需手动提取 Cookie。此扩展可直接在编辑器中监控您的 Cursor/Trae AI 使用情况，支持团队模式实现多人协作与多账号使用量追踪。
+无需手动提取 Cookie，监控您的 Cursor/Trae AI 使用量情况，支持数据远程投递到自建服务器。
+当前Cursor使用量规则：基础20美元API使用量+官方额外提供Bonus使用量（当前25美元）+ Auto使用量（当前150美元）。官方右下角统计显示“You've hit your usage limit” ，仅表示API基础20美元使用完毕（Cursor当前统计Bug，将Auto使用量一同计入）。
 
 **[English Version](README_EN.md) | 中文版**
 
 <div align="left">
-  <img src="https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/statebar.png" alt="状态栏配置" width="400">
+  <img src="https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/statebar.jpg" alt="状态栏配置" width="400">
 </div>
 
 当前支持[Cursor](cursor:extension/whyuds.coding-usage)、[Trae国际版](trae:extension/whyuds.coding-usage)

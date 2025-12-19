@@ -719,7 +719,7 @@ export class CodingUsageProvider {
 
       if (fastLimit > 0) {
         const progressInfo = CodingUsageProvider.buildProgressBar(fastUsed, fastLimit);
-        const header = `${subscriptionType} (${fastUsed}/${fastLimit})  Reset: ${formatTimeWithoutYear(entitlement_base_info.end_time, true)}`;
+        const header = `${subscriptionType} (${fastUsed}/${fastLimit})  Resets: ${formatTimeWithoutYear(entitlement_base_info.end_time, true)}`;
         sections.push(header);
         sections.push(`[${progressInfo.progressBar}] ${progressInfo.percentage}%`);
 
