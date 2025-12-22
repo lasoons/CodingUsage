@@ -1,32 +1,36 @@
 # Coding Usage
 
-监控您的 Cursor/Trae AI 使用量情况，支持多账号监控及数据远程投递到自建服务器。
-当前Cursor使用量规则：基础20美元API使用量+官方额外提供Bonus使用量（当前25美元）+ Auto使用量（当前150美元）。
+监控您的 Cursor/Trae/Antigravity AI 使用量情况，支持配置多账号本地监控，数据远程投递到自建服务器。
+当前使用量规则：
+- **Cursor**: 基础20美元API使用量 + 官方额外Bonus使用量（当前25美元） + Auto使用量（当前150美元）。 
+- **Trae**: 监控官方API提供的限额使用情况。
+- **Antigravity**: 监控 Claude 4.5、Gemini 3 Pro/Flash 等模型的限额与重置时间。
 
-**[English Version](README_EN.md) | 中文版**
 
-<div align="left">
-  <img src="https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/statebar.png" alt="状态栏配置" width="400">
-</div>
+**[English Version](README.md) | 中文版**
 
-当前支持[Cursor](cursor:extension/whyuds.coding-usage)、[Trae国际版](trae:extension/whyuds.coding-usage)
+| Cursor | Trae | Antigravity |
+|:------:|:----:|:-----------:|
+| ![Cursor](https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/statebar_cursor.png) | ![Trae](https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/statebar_trae.png) | ![Antigravity](https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/statebar_antigravity.png) |
 
-## 功能特性
 
-- **配置设置**：Cursor登录账号作为主账号无需配置，副账号可通过浏览器扩展自动获取SessionToken进行配置
-- **多账号监控**: 最多监控3个副账号使用量数据
-- **秒级使用量更新**：每10秒监控本地与AI对话，仅在对话变更时读取官方使用量API
-- **团队协作**：可选的团队服务器集成，实现共享使用情况追踪
-- **自动发现**：自动查找并配置可用的团队服务器，当前已部署至[演示服务器](http://115.190.183.157:3000/)
-- **使用量显示**：详细的工具提示，包含使用情况明细、进度条和账单周期信息
-
+当前支持[Cursor](cursor:extension/whyuds.coding-usage)、[Trae国际版](trae:extension/whyuds.coding-usage)、**Antigravity**
 
 ## 配置演示
 
 <div align="left">
-  <img src="https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/standalone.gif" alt="Basic Configuration Demo" width="600" style="display: inline-block; flex-shrink: 0;">
+  <img src="https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/standalone.gif" alt="基础配置演示" width="600" style="display: inline-block; flex-shrink: 0;">
 </div>
-<p align="left"><em>配置演示</em></p>
+<p align="left"><em>基础配置演示</em></p>
+
+## 功能特性
+
+- **多平台支持**：一套插件同时支持 Cursor、Trae 和 Antigravity 监控，自动切换显示
+- **免配置监控**：Antigravity 支持自动检测本地进程并获取 Token，无需任何手动输入
+- **秒级更新**：每10秒/分钟监控本地对话或进程，仅在变更时请求官方 API
+- **团队协作**：可选的团队服务器集成，实现共享使用情况追踪
+- **自动发现**：自动查找并配置可用的团队服务器，当前已部署至[演示服务器](http://115.190.183.157:3000/)
+- **使用量显示**：详细的工具提示，包含使用情况明细、进度条和账单周期信息
 
 ## 快速开始
 
@@ -90,7 +94,7 @@
 #### 团队模式的投递数据格式
 
 ```json
-{"client_token":"ck_eb....","email":"aisrvxxx@qiyi.com","expire_time":1767060076000,"membership_type":"pro","api_spend":2002,"api_limit":4500,"auto_spend":0,"auto_limit":15000,"host":"IQ275CG42123NJ","platform":"win32","app_name":"Cursor"}
+{"client_token":"ck_eb33d6fb4d5b541d28a0d042b0e4ba56","email":"aisrv0615@qiyi.com","expire_time":1767060076000,"membership_type":"pro","api_spend":2002,"api_limit":4500,"auto_spend":0,"auto_limit":15000,"host":"IQ275CG42123NJ","platform":"win32","app_name":"Cursor"}
 ```
 
 #### 我的令牌安全吗？

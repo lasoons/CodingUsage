@@ -9,11 +9,10 @@ Current usage rules:
 
 **English Version | [中文版](README_CN.md)**
 
-<div align="left">
-  <img src="https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/statebar_cursor.png" alt="Cursor Status Bar" width="400">
-  <img src="https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/statebar_trae.png" alt="Trae Status Bar" width="400">
-  <img src="https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/statebar_antigravity.png" alt="Antigravity Status Bar" width="400">
-</div>
+| Cursor | Trae | Antigravity |
+|:------:|:----:|:-----------:|
+| ![Cursor](https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/statebar_cursor.png) | ![Trae](https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/statebar_trae.png) | ![Antigravity](https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/statebar_antigravity.png) |
+
 
 Currently supports [Cursor](cursor:extension/whyuds.coding-usage), [Trae International](trae:extension/whyuds.coding-usage), and **Antigravity**
 

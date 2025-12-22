@@ -9,11 +9,10 @@
 
 **[English Version](README.md) | 中文版**
 
-<div align="left">
-  <img src="https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/statebar_cursor.png" alt="Cursor 状态栏" width="400">
-  <img src="https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/statebar_trae.png" alt="Trae 状态栏" width="400">
-  <img src="https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/statebar_antigravity.png" alt="Antigravity 状态栏" width="400">
-</div>
+| Cursor | Trae | Antigravity |
+|:------:|:----:|:-----------:|
+| ![Cursor](https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/statebar_cursor.png) | ![Trae](https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/statebar_trae.png) | ![Antigravity](https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/statebar_antigravity.png) |
+
 
 当前支持[Cursor](cursor:extension/whyuds.coding-usage)、[Trae国际版](trae:extension/whyuds.coding-usage)、**Antigravity**
 
