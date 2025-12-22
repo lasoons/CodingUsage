@@ -39,3 +39,11 @@ out/out/**
 
 # 只保留 sql-wasm.wasm，排除 sql-wasm.js（已打包在 extension.js 中）
 out/sql-wasm.js
+
+# 强制包含关键文件（防止市场发布时被过滤）
+!out/sql-wasm.wasm
+!out/serverList.json
+!out/extension.js
+!out/apiService.js
+!out/teamServerClient.js
+!out/utils.js
