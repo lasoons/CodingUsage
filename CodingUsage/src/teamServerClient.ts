@@ -10,8 +10,9 @@ import {
   setClientApiKey,
   setTeamServerUrl,
   isReportingEnabled
-} from './utils';
-import { UsageSummaryResponse, BillingCycleResponse, AggregatedUsageResponse, getApiService } from './apiService';
+} from './common/utils';
+import { UsageSummaryResponse, BillingCycleResponse, AggregatedUsageResponse } from './cursor/types';
+import { getCursorApiService } from './cursor/cursorApiService';
 
 const API_TIMEOUT = 5000;
 const SERVER_LIST_URL = 'https://gist.githubusercontent.com/lasoons/60b1dac84abee807ffe3d1aa0ac60967/raw/coding_usage_config.json';
@@ -143,7 +144,7 @@ export class TeamServerClient {
     if (!url) return;
 
     try {
-      const apiService = getApiService();
+      const apiService = getCursorApiService();
       const me = await apiService.fetchCursorUserInfo(sessionToken);
 
       // 检查账号变化并更新 API Key（使用 email 作为账号标识）

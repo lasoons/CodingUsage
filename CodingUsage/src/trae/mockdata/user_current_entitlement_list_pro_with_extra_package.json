@@ -1,0 +1,113 @@
+{
+    "is_pay_freshman": false,
+    "user_entitlement_pack_list": [
+        {
+            "entitlement_base_info": {
+                "charge_amount": 300,
+                "currency": 0,
+                "end_time": 1768991467,
+                "entitlement_id": "20791311876",
+                "product_extra": {
+                    "subscription_extra": {
+                        "period_type": 0,
+                        "quota": {
+                            "advanced_model_request_limit": -1,
+                            "auto_completion_limit": -1,
+                            "enable_solo_builder": true,
+                            "enable_solo_builder_v1": false,
+                            "enable_solo_coder": true,
+                            "enable_super_model": false,
+                            "premium_model_fast_request_limit": 600,
+                            "premium_model_slow_request_limit": -1
+                        }
+                    }
+                },
+                "product_type": 1,
+                "quota": {
+                    "advanced_model_request_limit": -1,
+                    "auto_completion_limit": -1,
+                    "enable_solo_builder": true,
+                    "enable_solo_builder_v1": false,
+                    "enable_solo_coder": true,
+                    "enable_super_model": false,
+                    "premium_model_fast_request_limit": 600,
+                    "premium_model_slow_request_limit": -1
+                },
+                "start_time": 1766399467,
+                "user_id": "7586624093342008338"
+            },
+            "expire_time": 0,
+            "is_last_period": false,
+            "next_billing_time": 1768905067,
+            "source_id": "20925084420",
+            "status": 1,
+            "usage": {
+                "advanced_model_amount": 0,
+                "advanced_model_request_usage": 0,
+                "auto_completion_amount": 168,
+                "auto_completion_usage": 0,
+                "is_flash_consuming": true,
+                "premium_model_fast_amount": 278.19,
+                "premium_model_fast_request_usage": 0,
+                "premium_model_slow_amount": 0,
+                "premium_model_slow_request_usage": 0
+            },
+            "yearly_expire_time": 0
+        },
+        {
+            "entitlement_base_info": {
+                "charge_amount": 0,
+                "currency": 0,
+                "end_time": 1768991492,
+                "entitlement_id": "21073830404",
+                "product_extra": {
+                    "package_extra": {
+                        "duration": 1,
+                        "package_duration_type": 1,
+                        "package_source_type": 2,
+                        "quota": {
+                            "advanced_model_request_limit": 0,
+                            "auto_completion_limit": 0,
+                            "enable_solo_builder": false,
+                            "enable_solo_builder_v1": false,
+                            "enable_solo_coder": false,
+                            "enable_super_model": false,
+                            "premium_model_fast_request_limit": 300,
+                            "premium_model_slow_request_limit": 0
+                        }
+                    }
+                },
+                "product_type": 2,
+                "quota": {
+                    "advanced_model_request_limit": 0,
+                    "auto_completion_limit": 0,
+                    "enable_solo_builder": false,
+                    "enable_solo_builder_v1": false,
+                    "enable_solo_coder": false,
+                    "enable_super_model": false,
+                    "premium_model_fast_request_limit": 300,
+                    "premium_model_slow_request_limit": 0
+                },
+                "start_time": 1766399492,
+                "user_id": "7586624093342008338"
+            },
+            "expire_time": 0,
+            "is_last_period": false,
+            "next_billing_time": 0,
+            "source_id": "20791311876",
+            "status": 0,
+            "usage": {
+                "advanced_model_amount": 0,
+                "advanced_model_request_usage": 0,
+                "auto_completion_amount": 0,
+                "auto_completion_usage": 0,
+                "is_flash_consuming": false,
+                "premium_model_fast_amount": 0,
+                "premium_model_fast_request_usage": 0,
+                "premium_model_slow_amount": 0,
+                "premium_model_slow_request_usage": 0
+            },
+            "yearly_expire_time": 0
+        }
+    ]
+}

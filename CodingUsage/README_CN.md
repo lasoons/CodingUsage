@@ -1,15 +1,21 @@
 # Coding Usage
 
-无需手动提取 Cookie，监控您的 Cursor/Trae AI 使用量情况，支持数据远程投递到自建服务器。
-当前Cursor使用量规则：基础20美元API使用量+官方额外提供Bonus使用量（当前25美元）+ Auto使用量（当前150美元）。官方右下角统计显示"You've hit your usage limit" ，仅表示API基础20美元使用完毕（Cursor当前统计Bug，将Auto使用量一同计入）。
+监控您的 Cursor/Trae/Antigravity AI 使用量情况，支持配置多账号本地监控，数据远程投递到自建服务器。
+当前使用量规则：
+- **Cursor**: 基础20美元API使用量 + 官方额外Bonus使用量（当前25美元） + Auto使用量（当前150美元）。 
+- **Trae**: 监控官方API提供的限额使用情况。
+- **Antigravity**: 监控 Claude 4.5、Gemini 3 Pro/Flash 等模型的限额与重置时间。
+
 
 **[English Version](README.md) | 中文版**
 
 <div align="left">
-  <img src="https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/statebar.png" alt="状态栏配置" width="400">
+  <img src="https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/statebar_cursor.png" alt="Cursor 状态栏" width="400">
+  <img src="https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/statebar_trae.png" alt="Trae 状态栏" width="400">
+  <img src="https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/statebar_antigravity.png" alt="Antigravity 状态栏" width="400">
 </div>
 
-当前支持[Cursor](cursor:extension/whyuds.coding-usage)、[Trae国际版](trae:extension/whyuds.coding-usage)
+当前支持[Cursor](cursor:extension/whyuds.coding-usage)、[Trae国际版](trae:extension/whyuds.coding-usage)、**Antigravity**
 
 ## 配置演示
 
@@ -20,8 +26,9 @@
 
 ## 功能特性
 
-- **配置设置**：浏览器扩展自动从官网获取令牌，复制到剪贴板，IDE扩展自动读取粘贴板进行配置
-- **秒级使用量更新**：每10秒监控本地与AI对话，仅在对话变更时读取官方使用量API
+- **多平台支持**：一套插件同时支持 Cursor、Trae 和 Antigravity 监控，自动切换显示
+- **免配置监控**：Antigravity 支持自动检测本地进程并获取 Token，无需任何手动输入
+- **秒级更新**：每10秒/分钟监控本地对话或进程，仅在变更时请求官方 API
 - **团队协作**：可选的团队服务器集成，实现共享使用情况追踪
 - **自动发现**：自动查找并配置可用的团队服务器，当前已部署至[演示服务器](http://115.190.183.157:3000/)
 - **使用量显示**：详细的工具提示，包含使用情况明细、进度条和账单周期信息
