@@ -82,3 +82,22 @@ export interface TraeSecondaryAccountData {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

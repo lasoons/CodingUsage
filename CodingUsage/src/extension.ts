@@ -6,7 +6,8 @@ import {
   getClientApiKey,
   getTeamServerUrl,
   getConfig,
-  isShowAllProvidersEnabled
+  isShowAllProvidersEnabled,
+  exportSessionLogs
 } from './common/utils';
 import { APP_NAME } from './common/constants';
 import { IUsageProvider } from './common/types';
@@ -18,7 +19,21 @@ import { ServerDiscovery, TeamServerClient, PingManager } from './teamServerClie
 
 export async function activate(context: vscode.ExtensionContext) {
   const appType = getAppType();
-  logWithTime(`${APP_NAME} Usage Monitor extension is now activated. AppType: ${appType}`);
+  
+  // 打印环境详情
+  const extensionId = 'whyuds.coding-usage';
+  const extension = vscode.extensions.getExtension(extensionId);
+  const extensionVersion = extension?.packageJSON?.version || 'unknown';
+  
+  logWithTime(`========== ${APP_NAME} Extension Activated ==========`);
+  logWithTime(`Extension Version: ${extensionVersion}`);
+  logWithTime(`IDE: ${vscode.env.appName} (${vscode.env.appHost})`);
+  logWithTime(`IDE Version: ${vscode.version}`);
+  logWithTime(`App Type: ${appType}`);
+  logWithTime(`Platform: ${process.platform} ${process.arch}`);
+  logWithTime(`Node Version: ${process.version}`);
+  logWithTime(`Language: ${vscode.env.language}`);
+  logWithTime(`=====================================================`);
 
   const providers: IUsageProvider[] = [];
   const showAll = isShowAllProvidersEnabled();
@@ -51,7 +66,7 @@ export async function activate(context: vscode.ExtensionContext) {
   }
 
   const clipboardMonitor = new ClipboardMonitor();
-  const dbMonitor = new DbMonitor(context, () => providers.forEach(p => p.refresh()));
+  const dbMonitor = new DbMonitor(context, () => providers.forEach(p => p.safeRefresh()));
   const pingManager = new PingManager();
 
   // 启动数据库监控（每10秒检查变化）
@@ -117,6 +132,9 @@ function registerCommands(
       } else {
         vscode.window.showErrorMessage('No API Key found. Please wait for it to be generated.');
       }
+    }),
+    vscode.commands.registerCommand('cursorUsage.exportLogs', async () => {
+      await exportSessionLogs();
     })
   ];
 
@@ -141,8 +159,6 @@ function registerListeners(context: vscode.ExtensionContext, providers: IUsagePr
 
 async function showUpdateSessionDialog(context: vscode.ExtensionContext): Promise<void> {
   const dashboardUrl = getDashboardUrl();
-  const clientApiKey = getClientApiKey();
-  const teamServerUrl = getTeamServerUrl();
   const showAllProviders = isShowAllProvidersEnabled();
 
   interface QuickPickItemExtended extends vscode.QuickPickItem {
@@ -155,12 +171,6 @@ async function showUpdateSessionDialog(context: vscode.ExtensionContext): Promis
       description: showAllProviders ? 'Click to show only current IDE' : 'Click to show usage for all IDEs',
       detail: 'View usage for Cursor, Trae, and Antigravity regardless of context',
       action: 'toggleShowAll'
-    },
-    {
-      label: '$(link-external) Copy API Key & Open Team Server',
-      description: 'Copy your API Key and open team server in browser',
-      detail: teamServerUrl ? `Server: ${teamServerUrl}` : 'Team server not configured',
-      action: 'copyKeyAndOpenServer'
     },
     {
       label: '$(gear) Open Extension Settings',
@@ -198,21 +208,6 @@ async function showUpdateSessionDialog(context: vscode.ExtensionContext): Promis
         const msg = await vscode.window.showInformationMessage(`Show All Providers ${action}! Please reload to apply changes.`, 'Reload');
         if (msg === 'Reload') {
           vscode.commands.executeCommand('workbench.action.reloadWindow');
-        }
-        break;
-      case 'copyKeyAndOpenServer':
-        // 复制 API Key 并跳转到 team server
-        if (!clientApiKey) {
-          vscode.window.showWarningMessage('API Key not generated yet. Please wait for primary account to be detected.');
-          break;
-        }
-        await vscode.env.clipboard.writeText(clientApiKey);
-
-        if (teamServerUrl) {
-          vscode.env.openExternal(vscode.Uri.parse(teamServerUrl));
-          vscode.window.showInformationMessage(`API Key copied! Opening team server...`);
-        } else {
-          vscode.window.showInformationMessage(`API Key copied! Please configure team server URL in settings.`);
         }
         break;
       case 'openSettings':

@@ -25,13 +25,33 @@ export interface TraeStorageAuthInfo {
 
 /**
  * 从 Trae 的 storage.json 文件中读取认证信息
- * 路径: %APPDATA%\Trae\User\globalStorage\storage.json
+ * 路径:
+ *   - Windows: %APPDATA%\Trae\User\globalStorage\storage.json
+ *   - macOS: ~/Library/Application Support/Trae/User/globalStorage/storage.json
+ *   - Linux: ~/.config/Trae/User/globalStorage/storage.json
  */
 export function getTraeStorageAuthInfo(): TraeStorageAuthInfo | null {
     try {
-        // 获取 Trae storage.json 路径
-        const appDataPath = process.env.APPDATA || path.join(os.homedir(), 'AppData', 'Roaming');
-        const storageJsonPath = path.join(appDataPath, 'Trae', 'User', 'globalStorage', 'storage.json');
+        // 获取 Trae storage.json 路径（支持跨平台）
+        const platform = os.platform();
+        const homeDir = os.homedir();
+        let baseStoragePath: string;
+
+        switch (platform) {
+            case 'win32': {
+                const appData = process.env.APPDATA || path.join(homeDir, 'AppData', 'Roaming');
+                baseStoragePath = path.join(appData, 'Trae', 'User', 'globalStorage');
+                break;
+            }
+            case 'darwin':
+                baseStoragePath = path.join(homeDir, 'Library', 'Application Support', 'Trae', 'User', 'globalStorage');
+                break;
+            default:
+                baseStoragePath = path.join(homeDir, '.config', 'Trae', 'User', 'globalStorage');
+                break;
+        }
+
+        const storageJsonPath = path.join(baseStoragePath, 'storage.json');
 
         if (!fs.existsSync(storageJsonPath)) {
             logWithTime(`Trae storage.json 不存在: ${storageJsonPath}`);
@@ -61,7 +81,7 @@ export function getTraeStorageAuthInfo(): TraeStorageAuthInfo | null {
             }
         }
 
-        logWithTime(`成功从 Trae storage.json 读取认证信息, userId: ${authInfo.userId}`);
+        logWithTime(`成功从 Trae storage.json 读取认证信息, userId: ${authInfo.userId}, Path: ${storageJsonPath}`);
         return {
             token: authInfo.token,
             refreshToken: authInfo.refreshToken,
@@ -165,6 +185,86 @@ export function disposeOutputChannel(): void {
     }
 }
 
+// ==================== 日志存储与简化 ====================
+const MAX_LOG_ENTRIES = 1000;
+const MAX_OUTPUT_LENGTH = 150; // Output channel 中单行最大显示字符数
+const sessionLogs: string[] = [];
+
+/**
+ * 简化日志内容用于输出显示
+ * 对于 API Response 等长内容进行截断
+ */
+function simplifyForOutput(message: string): string {
+    // 检测是否是 API Response 格式
+    const responseMatch = message.match(/^(\[API Response\] [A-Z]+ [^\s]+ => )(.+)$/);
+    if (responseMatch) {
+        const prefix = responseMatch[1];
+        const jsonPart = responseMatch[2];
+        if (jsonPart.length > MAX_OUTPUT_LENGTH) {
+            return `${prefix}${jsonPart.substring(0, MAX_OUTPUT_LENGTH)}...`;
+        }
+    }
+    
+    // 对于其他过长的消息也进行截断
+    if (message.length > MAX_OUTPUT_LENGTH + 50) {
+        return message.substring(0, MAX_OUTPUT_LENGTH + 50) + '...';
+    }
+    
+    return message;
+}
+
+/**
+ * 添加日志到会话存储
+ */
+function addToSessionLogs(logMessage: string): void {
+    sessionLogs.push(logMessage);
+    // 超过最大条目数时移除最旧的日志
+    if (sessionLogs.length > MAX_LOG_ENTRIES) {
+        sessionLogs.shift();
+    }
+}
+
+/**
+ * 获取当前会话的所有日志
+ */
+export function getSessionLogs(): string[] {
+    return [...sessionLogs];
+}
+
+/**
+ * 清除会话日志
+ */
+export function clearSessionLogs(): void {
+    sessionLogs.length = 0;
+}
+
+/**
+ * 导出会话日志到文件
+ */
+export async function exportSessionLogs(): Promise<void> {
+    if (sessionLogs.length === 0) {
+        vscode.window.showInformationMessage('没有可导出的日志');
+        return;
+    }
+    
+    const defaultFileName = `coding-usage-logs-${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}.log`;
+    
+    const uri = await vscode.window.showSaveDialog({
+        defaultUri: vscode.Uri.file(defaultFileName),
+        filters: {
+            'Log Files': ['log', 'txt'],
+            'All Files': ['*']
+        },
+        saveLabel: '导出日志'
+    });
+    
+    if (uri) {
+        const logContent = sessionLogs.join('\n');
+        await vscode.workspace.fs.writeFile(uri, Buffer.from(logContent, 'utf-8'));
+        vscode.window.showInformationMessage(`日志已导出到: ${uri.fsPath}`);
+    }
+}
+
 // ==================== 日志工具 ====================
 export function logWithTime(message: string): void {
     const timestamp = new Date().toLocaleString('en-US', {
@@ -176,9 +276,18 @@ export function logWithTime(message: string): void {
         second: '2-digit',
         hour12: false
     });
-    const logMessage = `[${timestamp}] ${message}`;
-    console.log(logMessage);
-    getOutputChannel().appendLine(logMessage);
+    const fullLogMessage = `[${timestamp}] ${message}`;
+    
+    // 保存完整日志用于导出
+    addToSessionLogs(fullLogMessage);
+    
+    // 控制台输出完整日志
+    console.log(fullLogMessage);
+    
+    // Output channel 输出简化后的日志
+    const simplifiedMessage = simplifyForOutput(message);
+    const simplifiedLogMessage = `[${timestamp}] ${simplifiedMessage}`;
+    getOutputChannel().appendLine(simplifiedLogMessage);
 }
 
 // ==================== 格式化工具 ====================
@@ -240,6 +349,57 @@ export function getClipboardTokenPattern(): RegExp | null {
     return null;
 }
 
+// ==================== Token 类型判断 ====================
+// 判断 token 属于哪个 IDE 类型
+// 用于副账号刷新时只更新对应 IDE 的账号
+export type TokenIdeType = 'cursor' | 'trae' | 'unknown';
+
+export function getTokenIdeType(token: string): TokenIdeType {
+    if (!token) {
+        return 'unknown';
+    }
+    
+    // Cursor token 判断：
+    // 1. 完整格式: WorkosCursorSessionToken=xxx
+    // 2. 纯 token 格式: userId%3A%3AjwtToken (包含 %3A%3A 即 ::)
+    // 3. JWT 格式: xxx.yyy.zzz (包含两个 .)
+    if (token.includes('WorkosCursorSessionToken=')) {
+        return 'cursor';
+    }
+    if (token.includes('%3A%3A')) {
+        // Cursor token 格式: userId%3A%3AaccessToken
+        return 'cursor';
+    }
+    // JWT 格式检测（两个 . 分隔的三段）
+    const jwtPattern = /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/;
+    if (jwtPattern.test(token) || (token.split('.').length === 3 && !token.includes('-'))) {
+        return 'cursor';
+    }
+    
+    // Trae token 判断：
+    // 1. 完整格式: X-Cloudide-Session=xxx
+    // 2. UUID 格式: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+    if (token.includes('X-Cloudide-Session=')) {
+        return 'trae';
+    }
+    // UUID 格式检测（8-4-4-4-12）
+    const uuidPattern = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
+    if (uuidPattern.test(token)) {
+        return 'trae';
+    }
+    
+    return 'unknown';
+}
+
+// 根据 IDE 类型过滤副账号 token
+export function filterTokensByIdeType(tokens: string[], ideType: 'cursor' | 'trae'): string[] {
+    return tokens.filter(token => {
+        const tokenType = getTokenIdeType(token);
+        // 只返回匹配当前 IDE 类型的 token，或未知类型的 token（向后兼容）
+        return tokenType === ideType || tokenType === 'unknown';
+    });
+}
+
 // ==================== 数据库监控字段 ====================
 export function getDbMonitorKey(): string {
     const appType = getAppType();
@@ -261,6 +421,17 @@ export function getDashboardUrl(): string {
     }
     return 'https://cursor.com/dashboard?tab=usage';
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 

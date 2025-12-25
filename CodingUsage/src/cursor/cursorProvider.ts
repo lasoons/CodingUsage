@@ -8,6 +8,7 @@ import {
     formatTimeWithoutYear,
     getAdditionalSessionTokens,
     isShowAllProvidersEnabled,
+    filterTokensByIdeType,
 } from '../common/utils';
 import {
     DOUBLE_CLICK_DELAY,
@@ -147,8 +148,7 @@ export class CursorProvider implements IUsageProvider {
     }
 
     public initialize(): void {
-        this.isRefreshing = true;
-        this.setLoadingState();
+        this.updateStatusBar();
         this.fetchData();
     }
 
@@ -296,7 +296,10 @@ export class CursorProvider implements IUsageProvider {
     }
 
     private async fetchSecondaryAccountsData(): Promise<void> {
-        const additionalTokens = getAdditionalSessionTokens();
+        const allTokens = getAdditionalSessionTokens();
+        // 只过滤出 Cursor 格式的 token，避免把 Trae 的 token 当作 Cursor 的来处理
+        const additionalTokens = filterTokensByIdeType(allTokens, 'cursor');
+        logWithTime(`副账号 token 过滤: 总计 ${allTokens.length} 个, Cursor 格式 ${additionalTokens.length} 个`);
         this.secondaryAccountsData.clear();
 
         for (let i = 0; i < additionalTokens.length; i++) {
@@ -366,7 +369,7 @@ export class CursorProvider implements IUsageProvider {
             const apiUsageDollars = apiUsageCents / 100;
             const apiLimitDollars = apiLimitCents / 100;
             if (showAll) {
-                this.statusBarItem.text = `Cursor: ${Math.round(apiPercentUsed)}%`;
+                this.statusBarItem.text = `$(cursor-logo) ${Math.round(apiPercentUsed)}%`;
             } else {
                 this.statusBarItem.text = `⚡ ${membershipType}: $${apiUsageDollars.toFixed(2)}/${apiLimitDollars.toFixed(0)} (${apiPercentUsed.toFixed(1)}%)`;
             }
@@ -375,7 +378,7 @@ export class CursorProvider implements IUsageProvider {
             const usedDollars = usedCents / 100;
             const limitDollars = plan.limit / 100;
             if (showAll) {
-                this.statusBarItem.text = `Cursor: ${Math.round(totalPercentUsed)}%`;
+                this.statusBarItem.text = `$(cursor-logo) ${Math.round(totalPercentUsed)}%`;
             } else {
                 this.statusBarItem.text = `⚡ ${membershipType}: $${usedDollars.toFixed(2)}/${limitDollars.toFixed(0)} (${totalPercentUsed.toFixed(1)}%)`;
             }
@@ -715,6 +718,15 @@ export class CursorProvider implements IUsageProvider {
         return result.join('\n');
     }
 }
+
+
+
+
+
+
+
+
+
 
 
 

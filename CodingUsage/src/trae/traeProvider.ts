@@ -5,6 +5,7 @@ import {
     formatTimeWithoutYear,
     getAppType,
     isShowAllProvidersEnabled,
+    filterTokensByIdeType,
 } from '../common/utils';
 import {
     APP_NAME,
@@ -166,7 +167,6 @@ export class TraeProvider implements IUsageProvider {
      * 使用自动 Token 获取 Trae 数据
      */
     private async fetchTraeDataAuto(): Promise<void> {
-        logWithTime('开始获取 Trae 数据（自动模式）');
         try {
             const authToken = await this.apiService.getAutoToken(undefined, 0, this.isManualRefresh);
             if (!authToken) {
@@ -246,7 +246,10 @@ export class TraeProvider implements IUsageProvider {
      * 获取副账号数据
      */
     private async fetchSecondaryAccountsData(): Promise<void> {
-        const additionalTokens = getAdditionalSessionTokens();
+        const allTokens = getAdditionalSessionTokens();
+        // 只过滤出 Trae 格式的 token，避免把 Cursor 的 token 当作 Trae 的来处理
+        const additionalTokens = filterTokensByIdeType(allTokens, 'trae');
+        logWithTime(`副账号 token 过滤: 总计 ${allTokens.length} 个, Trae 格式 ${additionalTokens.length} 个`);
         this.secondaryAccountsData.clear();
 
         for (let i = 0; i < additionalTokens.length; i++) {
@@ -389,7 +392,7 @@ export class TraeProvider implements IUsageProvider {
         const showAll = isShowAllProvidersEnabled();
 
         if (showAll) {
-            this.statusBarItem.text = `Trae: ${Math.round(percentage)}%`;
+            this.statusBarItem.text = `$(trae-logo) ${Math.round(percentage)}%`;
         } else {
             this.statusBarItem.text = `⚡ Fast: ${totalUsage}/${totalLimit} (${remainingFormatted} Left)`;
         }
@@ -597,5 +600,16 @@ export class TraeProvider implements IUsageProvider {
         return `${left}${' '.repeat(spaceCount)}${updateTime}`;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
 
 

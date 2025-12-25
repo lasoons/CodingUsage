@@ -31,14 +31,16 @@ export class CursorApiService {
      * 获取 Cursor 使用摘要
      */
     public async fetchCursorUsageSummary(sessionToken: string): Promise<UsageSummaryResponse> {
+        const url = `${CURSOR_API_BASE_URL}/usage-summary`;
+        logWithTime(`[API Request] GET ${url}`);
         const response = await axios.get<UsageSummaryResponse>(
-            `${CURSOR_API_BASE_URL}/usage-summary`,
+            url,
             {
                 headers: this.createCursorHeaders(sessionToken, 'https://cursor.com'),
                 timeout: API_TIMEOUT
             }
         );
-        logWithTime('获取 Cursor 使用汇总成功');
+        logWithTime(`[API Response] GET ${url} => ${JSON.stringify(response.data)}`);
         return response.data;
     }
 
@@ -46,13 +48,16 @@ export class CursorApiService {
      * 获取 Cursor 用户信息
      */
     public async fetchCursorUserInfo(sessionToken: string): Promise<UserInfoResponse> {
+        const url = `${CURSOR_API_BASE_URL}/dashboard/get-me`;
+        logWithTime(`[API Request] GET ${url}`);
         const response = await axios.get(
-            `${CURSOR_API_BASE_URL}/dashboard/get-me`,
+            url,
             {
                 headers: this.createCursorHeaders(sessionToken, 'https://cursor.com'),
                 timeout: API_TIMEOUT
             }
         );
+        logWithTime(`[API Response] GET ${url} => ${JSON.stringify(response.data)}`);
         return response.data;
     }
 
@@ -60,15 +65,18 @@ export class CursorApiService {
      * 获取 Cursor 当前账单周期
      */
     public async fetchCursorBillingCycle(sessionToken: string): Promise<BillingCycleResponse> {
+        const url = `${CURSOR_API_BASE_URL}/dashboard/get-current-billing-cycle`;
+        const body = {};
+        logWithTime(`[API Request] POST ${url} Body: ${JSON.stringify(body)}`);
         const response = await axios.post<BillingCycleResponse>(
-            `${CURSOR_API_BASE_URL}/dashboard/get-current-billing-cycle`,
-            {},
+            url,
+            body,
             {
                 headers: this.createCursorHeaders(sessionToken),
                 timeout: API_TIMEOUT
             }
         );
-        logWithTime('获取 Cursor 账单周期成功');
+        logWithTime(`[API Response] POST ${url} => ${JSON.stringify(response.data)}`);
         return response.data;
     }
 
@@ -76,18 +84,21 @@ export class CursorApiService {
      * 获取 Cursor 聚合使用事件
      */
     public async fetchCursorAggregatedUsage(sessionToken: string, startDateEpochMillis: number): Promise<AggregatedUsageResponse> {
+        const url = `${CURSOR_API_BASE_URL}/dashboard/get-aggregated-usage-events`;
+        const body = {
+            teamId: -1,
+            startDate: startDateEpochMillis
+        };
+        logWithTime(`[API Request] POST ${url} Body: ${JSON.stringify(body)}`);
         const response = await axios.post<AggregatedUsageResponse>(
-            `${CURSOR_API_BASE_URL}/dashboard/get-aggregated-usage-events`,
-            {
-                teamId: -1,
-                startDate: startDateEpochMillis
-            },
+            url,
+            body,
             {
                 headers: this.createCursorHeaders(sessionToken),
                 timeout: API_TIMEOUT
             }
         );
-        logWithTime('获取 Cursor 聚合使用数据成功');
+        logWithTime(`[API Response] POST ${url} => ${JSON.stringify(response.data)}`);
         return response.data;
     }
 }
@@ -95,6 +106,18 @@ export class CursorApiService {
 export function getCursorApiService(): CursorApiService {
     return CursorApiService.getInstance();
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

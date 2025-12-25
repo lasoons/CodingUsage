@@ -3,20 +3,18 @@ import { IUsageProvider } from '../common/types';
 import { logWithTime, getOutputChannel, isShowAllProvidersEnabled } from '../common/utils';
 import { DOUBLE_CLICK_DELAY, FETCH_TIMEOUT } from '../common/constants';
 import { QuotaSnapshot, ModelQuotaInfo } from './types';
-import { PortDetector } from './portDetector';
-import { getAntigravityApiService } from './antigravityApiService';
+import { DatabaseReader } from './databaseReader';
 
 export class AntigravityProvider implements IUsageProvider {
     private quotaData: QuotaSnapshot | null = null;
     private statusBarItem: vscode.StatusBarItem;
-    private apiService = getAntigravityApiService();
-    private portDetector = new PortDetector();
+    private databaseReader = new DatabaseReader();
 
     private clickCount = 0;
     private clickTimer: NodeJS.Timeout | null = null;
     private fetchTimeoutTimer: NodeJS.Timeout | null = null;
     private pollingTimer: NodeJS.Timeout | null = null;
-    private readonly POLLING_INTERVAL = 100 * 1000; // 100秒
+    private readonly POLLING_INTERVAL = 10 * 1000; // 10秒，与DbMonitor一致
     private isRefreshing = false;
     private isManualRefresh = false;
 
@@ -42,7 +40,6 @@ export class AntigravityProvider implements IUsageProvider {
         this.stopPolling();
         this.pollingTimer = setInterval(() => {
             if (!this.isRefreshing) {
-                logWithTime('[Antigravity] 自动轮询刷新');
                 this.fetchData();
             }
         }, this.POLLING_INTERVAL);
@@ -128,15 +125,16 @@ export class AntigravityProvider implements IUsageProvider {
         }, FETCH_TIMEOUT);
 
         try {
-            const info = await this.portDetector.detectProcessInfo();
-            if (info) {
-                this.apiService.setProcessInfo(info);
-                const snapshot = await this.apiService.fetchQuota();
-                if (snapshot) {
+            const authStatus = await this.databaseReader.readAuthStatus();
+            if (authStatus && authStatus.userStatusProtoBinaryBase64) {
+                const snapshot = this.databaseReader.parseUserStatusProto(authStatus.userStatusProtoBinaryBase64);
+                if (snapshot && snapshot.models.length > 0) {
                     this.quotaData = snapshot;
+                } else {
+                    logWithTime('[Antigravity] 本地数据库解析失败或无模型数据');
                 }
             } else {
-                logWithTime('[Antigravity] 未检测到进程');
+                logWithTime('[Antigravity] 本地数据库中无认证信息');
             }
         } catch (error) {
             logWithTime(`[Antigravity] fetchData 错误: ${error}`);
@@ -150,17 +148,16 @@ export class AntigravityProvider implements IUsageProvider {
         const showAll = isShowAllProvidersEnabled();
         if (!this.quotaData) {
             if (showAll) {
-                // In Show All mode, hide unauthenticated/unavailable providers
                 this.statusBarItem.hide();
                 return;
             }
             this.statusBarItem.show();
             this.statusBarItem.text = '$(warning) Antigravity: Off';
-            this.statusBarItem.tooltip = 'Unable to detect Antigravity process\nClick to refresh';
+            this.statusBarItem.tooltip = 'Antigravity 数据不可用\n点击刷新';
             return;
         }
 
-        // Find relevant models and build display items with full names
+        // Find relevant models and build display items
         const claude = this.quotaData.models.find(m => m.label.toLowerCase().includes('claude'));
         const gPro = this.quotaData.models.find(m => m.label.toLowerCase().includes('pro'));
         const gFlash = this.quotaData.models.find(m => m.label.toLowerCase().includes('flash'));
@@ -170,19 +167,26 @@ export class AntigravityProvider implements IUsageProvider {
         if (gPro) displayItems.push({ name: 'Gemini Pro', model: gPro });
         if (gFlash) displayItems.push({ name: 'Gemini Flash', model: gFlash });
 
-        // Filter out models at 0% usage (100% remaining) - they don't need to be in rotation
+        // Filter out models at 0% usage (100% remaining)
         const rotationItems = displayItems.filter(item =>
             item.model.remainingPercentage !== undefined && item.model.remainingPercentage < 100
         );
 
+        // Antigravity icon: $(antigravity-logo)
+        const agIcon = '$(antigravity-logo)';
+
         if (rotationItems.length === 0) {
-            this.statusBarItem.text = 'Antigravity: 0%';
+            if (showAll) {
+                this.statusBarItem.text = `${agIcon} 0%`;
+            } else {
+                this.statusBarItem.text = 'Antigravity: 0%';
+            }
         } else {
             // Sort by timeUntilReset ascending (closest to reset first)
             rotationItems.sort((a, b) => a.model.timeUntilReset - b.model.timeUntilReset);
             const current = rotationItems[0];
             if (showAll) {
-                this.statusBarItem.text = `Antigravity: ${this.formatUsage(current.model)}`;
+                this.statusBarItem.text = `${agIcon} ${this.formatUsage(current.model)}`;
             } else {
                 this.statusBarItem.text = `Antigravity: ${this.formatUsage(current.model)} (${current.model.timeUntilResetFormatted})`;
             }
@@ -202,13 +206,12 @@ export class AntigravityProvider implements IUsageProvider {
         md.supportHtml = true;
 
         if (!this.quotaData) {
-            md.appendMarkdown('Antigravity process not detected.\n\n[Refresh](command:cursorUsage.refresh)');
+            md.appendMarkdown('Antigravity 数据不可用\n\n[刷新](command:cursorUsage.refresh)');
             return md;
         }
 
         md.appendMarkdown(`**Antigravity Usage** \u00A0\u00A0 🕐${this.formatTime(this.quotaData.timestamp)}\n\n`);
 
-        // Create a Markdown table for better alignment
         const header = '| Model | Usage | Reset |';
         const separator = '| :--- | :--- | :--- |';
 
@@ -221,13 +224,11 @@ export class AntigravityProvider implements IUsageProvider {
         });
 
         md.appendMarkdown(`${header}\n${separator}\n${tableRows}\n`);
-
         md.appendMarkdown('---\n\n[Refresh](command:cursorUsage.refresh) \u00A0\u00A0 [Settings](command:cursorUsage.updateSession)');
         return md;
     }
 
     private shortenModelLabel(label: string): string {
-        // 缩短模型名称以节省空间
         const mappings: Record<string, string> = {
             'Claude Sonnet 4.5': 'Sonnet 4.5',
             'Claude Sonnet 4.5 (Thinking)': 'Sonnet 4.5T',

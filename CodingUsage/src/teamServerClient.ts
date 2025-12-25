@@ -4,11 +4,9 @@ import * as crypto from 'crypto';
 import axios from 'axios';
 import {
   logWithTime,
-  getAppDisplayName,
   getTeamServerUrl,
   getClientApiKey,
   setClientApiKey,
-  setTeamServerUrl,
   isReportingEnabled
 } from './common/utils';
 import { UsageSummaryResponse, BillingCycleResponse, AggregatedUsageResponse } from './cursor/types';
@@ -99,23 +97,13 @@ export class ServerDiscovery {
     return null;
   }
 
-  // 自动配置 Team Server URL
+  // 自动配置 Team Server URL（已禁用，默认留空）
   static async autoConfigureIfNeeded(): Promise<void> {
     const currentUrl = getTeamServerUrl();
-
     if (currentUrl) {
       logWithTime(`Team Server URL 已配置: ${currentUrl}`);
-      return;
-    }
-
-    logWithTime('Team Server URL 未配置，开始自动发现...');
-    const discoveredUrl = await this.discoverServer();
-
-    if (discoveredUrl) {
-      const appName = getAppDisplayName();
-      await setTeamServerUrl(discoveredUrl);
-      logWithTime(`已自动配置 Team Server URL: ${discoveredUrl}`);
-      vscode.window.showInformationMessage(`${appName} Usage: Auto-configured server ${discoveredUrl}`);
+    } else {
+      // logWithTime('Team Server URL 未配置，请在设置中手动配置');
     }
   }
 }
@@ -137,7 +125,6 @@ export class TeamServerClient {
     aggregatedData?: AggregatedUsageResponse | null
   ): Promise<void> {
     if (!isReportingEnabled()) {
-      logWithTime('投递功能未启用，跳过提交');
       return;
     }
     const url = getTeamServerUrl();
@@ -204,7 +191,6 @@ export class TeamServerClient {
     membership_type: string;
   }): Promise<void> {
     if (!isReportingEnabled()) {
-      logWithTime('投递功能未启用，跳过提交');
       return;
     }
     const url = getTeamServerUrl();

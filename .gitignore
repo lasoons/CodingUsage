@@ -2,3 +2,4 @@
 CursorUsageServer/node_modules/
 CursorUsageServer/db.sqlite
 .idea/
+CodingUsageWeb/.env

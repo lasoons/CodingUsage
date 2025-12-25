@@ -62,9 +62,12 @@ export class TraeApiService {
         const currentHost = this.cachedTraeHost || TRAE_DEFAULT_HOST;
 
         try {
+            const url = `${currentHost}/cloudide/api/v3/common/GetUserToken`;
+            const body = {};
+            logWithTime(`[API Request] POST ${url} Body: ${JSON.stringify(body)}`);
             const response = await axios.post<TraeTokenResponse>(
-                `${currentHost}/cloudide/api/v3/common/GetUserToken`,
-                {},
+                url,
+                body,
                 {
                     headers: {
                         'Cookie': `X-Cloudide-Session=${sessionId}`,
@@ -74,8 +77,7 @@ export class TraeApiService {
                     timeout: API_TIMEOUT
                 }
             );
-
-            logWithTime('通过 Session ID 更新 Trae Token');
+            logWithTime(`[API Response] POST ${url} => ${JSON.stringify(response.data)}`);
             this.cachedTraeToken = response.data.Result.Token;
             return this.cachedTraeToken;
         } catch (error) {
@@ -155,10 +157,13 @@ export class TraeApiService {
             }
 
             const currentHost = this.cachedTraeHost || TRAE_DEFAULT_HOST;
+            const url = `${currentHost}/cloudide/api/v3/common/GetUserToken`;
+            const body = {};
             const traeTokenResponse = await apiRequestWithRetry(async () => {
+                logWithTime(`[API Request] POST ${url} Body: ${JSON.stringify(body)}`);
                 const response = await axios.post<TraeTokenResponse>(
-                    `${currentHost}/cloudide/api/v3/common/GetUserToken`,
-                    {},
+                    url,
+                    body,
                     {
                         headers: {
                             'Cookie': `X-Cloudide-Session=${currentSessionId}`,
@@ -168,6 +173,7 @@ export class TraeApiService {
                         timeout: API_TIMEOUT
                     }
                 );
+                logWithTime(`[API Response] POST ${url} => ${JSON.stringify(response.data)}`);
                 return response.data;
             }, '获取 Trae 用户 Token 响应');
 
@@ -187,11 +193,14 @@ export class TraeApiService {
     public async getTraeUserEntitlementList(authToken: string): Promise<TraeApiResponse | null> {
         try {
             const currentHost = this.cachedTraeHost || TRAE_DEFAULT_HOST;
+            const url = `${currentHost}/trae/api/v1/pay/user_current_entitlement_list`;
+            const body = {};
 
             const result = await apiRequestWithRetry(async () => {
+                logWithTime(`[API Request] POST ${url} Body: ${JSON.stringify(body)}`);
                 const response = await axios.post(
-                    `${currentHost}/trae/api/v1/pay/user_current_entitlement_list`,
-                    {},
+                    url,
+                    body,
                     {
                         headers: {
                             'authorization': `Cloud-IDE-JWT ${authToken}`,
@@ -201,6 +210,7 @@ export class TraeApiService {
                         timeout: API_TIMEOUT
                     }
                 );
+                logWithTime(`[API Response] POST ${url} => ${JSON.stringify(response.data)}`);
                 return response.data;
             }, '获取用户权益列表');
 
@@ -223,6 +233,18 @@ export class TraeApiService {
 export function getTraeApiService(): TraeApiService {
     return TraeApiService.getInstance();
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

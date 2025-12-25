@@ -100,7 +100,7 @@ export class DbMonitor {
             }
             const contentHash = crypto.createHash('md5').update(content, 'utf8').digest('hex');
             if (this.lastContentHash !== contentHash) {
-                logWithTime(`[DbMonitor] 内容变化: ${this.lastContentHash?.slice(0, 8) ?? 'null'} -> ${contentHash.slice(0, 8)}`);
+                logWithTime(`[DbMonitor] 内容变化: ${this.lastContentHash?.slice(0, 8) ?? 'null'} -> ${contentHash.slice(0, 8)}, DB: ${dbPath}`);
                 this.lastContentHash = contentHash;
                 this.triggerRefresh();
             }
@@ -191,6 +191,20 @@ export class ClipboardMonitor {
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
