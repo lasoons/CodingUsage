@@ -2,6 +2,8 @@
 
 Monitor your Cursor/Trae/Antigravity AI usage, supporting multi-IDE and multi-account monitoring.
 
+![Multi-IDE Status Bar Display](https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/statebar_showall.png)
+
 Current usage rules:
 - **Cursor**: Base $20 API usage + Official bonus ($25 currently) + Auto usage ($150 currently)
 - **Trae**: Monitor API quota usage provided by the official platform

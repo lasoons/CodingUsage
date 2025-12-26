@@ -6,6 +6,10 @@ import { UsageSummaryResponse, UserInfoResponse, BillingCycleResponse, Aggregate
 export class CursorApiService {
     private static instance: CursorApiService;
 
+    // 缓存：key 为 sessionToken，value 为响应数据
+    private userInfoCache: Map<string, UserInfoResponse> = new Map();
+    private billingCycleCache: Map<string, BillingCycleResponse> = new Map();
+
     private constructor() { }
 
     public static getInstance(): CursorApiService {
@@ -13,6 +17,14 @@ export class CursorApiService {
             CursorApiService.instance = new CursorApiService();
         }
         return CursorApiService.instance;
+    }
+
+    /**
+     * 清除所有缓存（如需手动刷新时调用）
+     */
+    public clearCache(): void {
+        this.userInfoCache.clear();
+        this.billingCycleCache.clear();
     }
 
     /**
@@ -45,9 +57,15 @@ export class CursorApiService {
     }
 
     /**
-     * 获取 Cursor 用户信息
+     * 获取 Cursor 用户信息（带缓存）
      */
     public async fetchCursorUserInfo(sessionToken: string): Promise<UserInfoResponse> {
+        // 检查缓存
+        const cached = this.userInfoCache.get(sessionToken);
+        if (cached) {
+            return cached;
+        }
+
         const url = `${CURSOR_API_BASE_URL}/dashboard/get-me`;
         logWithTime(`[API Request] GET ${url}`);
         const response = await axios.get(
@@ -58,13 +76,22 @@ export class CursorApiService {
             }
         );
         logWithTime(`[API Response] GET ${url} => ${JSON.stringify(response.data)}`);
+
+        // 存入缓存
+        this.userInfoCache.set(sessionToken, response.data);
         return response.data;
     }
 
     /**
-     * 获取 Cursor 当前账单周期
+     * 获取 Cursor 当前账单周期（带缓存）
      */
     public async fetchCursorBillingCycle(sessionToken: string): Promise<BillingCycleResponse> {
+        // 检查缓存
+        const cached = this.billingCycleCache.get(sessionToken);
+        if (cached) {
+            return cached;
+        }
+
         const url = `${CURSOR_API_BASE_URL}/dashboard/get-current-billing-cycle`;
         const body = {};
         logWithTime(`[API Request] POST ${url} Body: ${JSON.stringify(body)}`);
@@ -77,6 +104,9 @@ export class CursorApiService {
             }
         );
         logWithTime(`[API Response] POST ${url} => ${JSON.stringify(response.data)}`);
+
+        // 存入缓存
+        this.billingCycleCache.set(sessionToken, response.data);
         return response.data;
     }
 

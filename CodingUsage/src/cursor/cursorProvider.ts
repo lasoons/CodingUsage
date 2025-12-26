@@ -157,6 +157,7 @@ export class CursorProvider implements IUsageProvider {
         this.isManualRefresh = true;
         this.isRefreshing = true;
         this.setLoadingState();
+        this.apiService.clearCache();
         this.fetchData();
     }
 

@@ -2,6 +2,8 @@
 
 监控您的 Cursor/Trae/Antigravity AI 使用量情况，支持多IDE、多账号监控
 
+![多IDE状态栏展示](https://raw.githubusercontent.com/lasoons/CodingUsage/refs/heads/main/CodingUsage/img/statebar_showall.png)
+
 当前使用量规则：
 - **Cursor**: 基础20美元API使用量 + 官方额外Bonus使用量（当前25美元） + Auto使用量（当前150美元）
 - **Trae**: 监控官方API提供的限额使用情况

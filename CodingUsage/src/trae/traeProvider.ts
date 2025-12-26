@@ -484,7 +484,9 @@ export class TraeProvider implements IUsageProvider {
                     if (totalLimit > 0) {
                         const progressInfo = TraeProvider.buildProgressBar(totalUsage, totalLimit);
                         const usageFormatted = `${totalUsage.toFixed(0)}/${totalLimit}`;
-                        md.appendMarkdown(`Fast (${usageFormatted}) [${progressInfo.progressBar}] ${progressInfo.percentage}%\n\n`);
+                        // 获取第一个有效 pack 的结束时间作为 Resets 时间
+                        const endTime = formatTimeWithoutYear(accValidPacks[0].entitlement_base_info.end_time, true);
+                        md.appendMarkdown(`Fast (${usageFormatted}) [${progressInfo.progressBar}] ${progressInfo.percentage}% ${endTime}\n\n`);
                     }
                 }
             });
