@@ -395,7 +395,7 @@ export class CursorProvider implements IUsageProvider {
     }
 
     public static calculateUsageFromAggregatedStatic(aggregatedData: AggregatedUsageResponse | null): { apiUsageCents: number; autoUsageCents: number } {
-        if (!aggregatedData) {
+        if (!aggregatedData || !aggregatedData.aggregations) {
             return { apiUsageCents: 0, autoUsageCents: 0 };
         }
 

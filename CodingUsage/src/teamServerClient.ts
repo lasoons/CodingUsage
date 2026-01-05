@@ -143,7 +143,7 @@ export class TeamServerClient {
       // 从聚合数据计算 API 和 Auto 使用量
       let apiUsageCents = 0;
       let autoUsageCents = 0;
-      if (aggregatedData) {
+      if (aggregatedData && aggregatedData.aggregations) {
         for (const event of aggregatedData.aggregations) {
           if (event.modelIntent === 'default') {
             autoUsageCents += event.totalCents;
