@@ -196,6 +196,12 @@ export class DatabaseReader {
                 }
 
                 if (remainingFraction !== undefined || resetTime !== undefined) {
+                    // In Proto3, default values (like 0.0 for float) are not serialized.
+                    // If we found the record (indicated by resetTime present) but no remainingFraction,
+                    // it implies the remaining fraction is 0.0 (exhausted).
+                    if (remainingFraction === undefined && resetTime !== undefined) {
+                        remainingFraction = 0;
+                    }
                     quotaMap.set(label, { remainingFraction, resetTime });
                 }
             }
