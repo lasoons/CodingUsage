@@ -142,7 +142,6 @@ export class DatabaseReader {
 
     private parseQuotaFields(buffer: Buffer): Map<string, { remainingFraction?: number; resetTime?: Date }> {
         const quotaMap = new Map<string, { remainingFraction?: number; resetTime?: Date }>();
-
         const str = buffer.toString('binary');
 
         // Known model labels in Antigravity proto format
@@ -156,53 +155,47 @@ export class DatabaseReader {
             'GPT-OSS 120B (Medium)',
         ];
 
+        const bufferLen = buffer.length;
+
         for (const label of modelLabels) {
             const idx = str.indexOf(label);
             if (idx !== -1) {
-                const searchStart = idx + label.length;
-                const searchEnd = Math.min(buffer.length, searchStart + 100);
+                // Search for Field 15 (0x7a) nearby
+                let searchPtr = idx + label.length;
+                // Limit search to 500 bytes after label
+                const searchLimit = Math.min(bufferLen, searchPtr + 500);
+                let foundForLabel = false;
 
-                let remainingFraction: number | undefined;
-                let resetTime: Date | undefined;
-
-                // Search for quota float value after the model name
-                // Pattern: 0x7a 0x0d 0x0d followed by 4-byte float
-                for (let i = searchStart; i < searchEnd - 6; i++) {
-                    if (buffer[i] === 0x7a && buffer[i + 1] === 0x0d && buffer[i + 2] === 0x0d) {
+                while (searchPtr < searchLimit) {
+                    // 0x7a = Field 15, Wire 2
+                    if (buffer[searchPtr] === 0x7a) {
                         try {
-                            const floatVal = buffer.readFloatLE(i + 3);
-                            // Valid remaining fraction should be between 0 and 1
-                            if (floatVal >= 0 && floatVal <= 1) {
-                                remainingFraction = floatVal;
-                                break;
+                            const { value: msgLen, bytesRead: lenBytes } = this.readVarintTuple(buffer, searchPtr + 1);
+                            const msgStart = searchPtr + 1 + lenBytes;
+                            const msgEnd = msgStart + msgLen;
+
+                            if (msgEnd <= bufferLen) {
+                                const parsed = this.parseInnerQuotaMessage(buffer, msgStart, msgEnd);
+                                if (parsed.found) {
+                                    let { remainingFraction, resetTime } = parsed;
+
+                                    // Fix for 100% used (0 remaining) - default value omission
+                                    if (remainingFraction === undefined && resetTime !== undefined) {
+                                        remainingFraction = 0;
+                                    }
+
+                                    if (remainingFraction !== undefined || resetTime !== undefined) {
+                                        quotaMap.set(label, { remainingFraction, resetTime });
+                                        foundForLabel = true;
+                                    }
+                                    break; // Found for this label, stop searching 0x7a
+                                }
                             }
-                        } catch {
-                            // Ignore read errors
+                        } catch (e) {
+                            // Ignore parsing errors and continue search
                         }
                     }
-                }
-
-                // Search for resetTime timestamp after the model name
-                // Pattern: 0x12 0x06 0x08 followed by varint timestamp
-                for (let i = searchStart; i < searchEnd - 8; i++) {
-                    if (buffer[i] === 0x12 && buffer[i + 1] === 0x06 && buffer[i + 2] === 0x08) {
-                        const timestamp = this.readVarint(buffer, i + 3);
-                        // Valid timestamp should be in reasonable range (2024-2030)
-                        if (timestamp > 1704067200 && timestamp < 1900000000) {
-                            resetTime = new Date(timestamp * 1000);
-                            break;
-                        }
-                    }
-                }
-
-                if (remainingFraction !== undefined || resetTime !== undefined) {
-                    // In Proto3, default values (like 0.0 for float) are not serialized.
-                    // If we found the record (indicated by resetTime present) but no remainingFraction,
-                    // it implies the remaining fraction is 0.0 (exhausted).
-                    if (remainingFraction === undefined && resetTime !== undefined) {
-                        remainingFraction = 0;
-                    }
-                    quotaMap.set(label, { remainingFraction, resetTime });
+                    searchPtr++;
                 }
             }
         }
@@ -210,7 +203,97 @@ export class DatabaseReader {
         return quotaMap;
     }
 
-    private readVarint(buffer: Buffer, offset: number): number {
+    private parseInnerQuotaMessage(buffer: Buffer, start: number, end: number): { remainingFraction?: number; resetTime?: Date; found: boolean } {
+        let remainingFraction: number | undefined;
+        let resetTime: Date | undefined;
+        let foundAny = false;
+
+        let ptr = start;
+        while (ptr < end) {
+            const { value: tag, bytesRead: tagBytes } = this.readVarintTuple(buffer, ptr);
+            ptr += tagBytes;
+
+            const wireType = tag & 0x07;
+            const fieldNum = tag >>> 3;
+
+            if (fieldNum === 1 && wireType === 5) { // Field 1: float
+                if (ptr + 4 <= end) {
+                    remainingFraction = buffer.readFloatLE(ptr);
+                    if (remainingFraction >= 0 && remainingFraction <= 1) {
+                        foundAny = true;
+                    } else {
+                        remainingFraction = undefined;
+                    }
+                    ptr += 4;
+                } else break;
+            } else if (fieldNum === 2 && wireType === 2) { // Field 2: nested message
+                const { value: innerLen, bytesRead: innerLenBytes } = this.readVarintTuple(buffer, ptr);
+                ptr += innerLenBytes;
+                const innerEnd = ptr + innerLen;
+                if (innerEnd <= end) {
+                    const rt = this.parseResetTimeMessage(buffer, ptr, innerEnd);
+                    if (rt) {
+                        resetTime = rt;
+                        foundAny = true;
+                    }
+                    ptr = innerEnd;
+                } else break;
+            } else {
+                const newPtr = this.skipField(buffer, ptr, wireType);
+                if (newPtr === -1 || newPtr > end) break;
+                ptr = newPtr;
+            }
+        }
+
+        return { remainingFraction, resetTime, found: foundAny };
+    }
+
+    private parseResetTimeMessage(buffer: Buffer, start: number, end: number): Date | undefined {
+        let ptr = start;
+        while (ptr < end) {
+            const { value: tag, bytesRead: tagBytes } = this.readVarintTuple(buffer, ptr);
+            ptr += tagBytes;
+            const wireType = tag & 0x07;
+            const fieldNum = tag >>> 3;
+
+            if (fieldNum === 1 && wireType === 0) { // Field 1: Varint timestamp
+                const { value: ts, bytesRead: tsBytes } = this.readVarintTuple(buffer, ptr);
+                ptr += tsBytes;
+                // Sanity check (2024-2030)
+                if (ts > 1704067200 && ts < 1900000000) {
+                    return new Date(ts * 1000);
+                }
+            } else {
+                const newPtr = this.skipField(buffer, ptr, wireType);
+                if (newPtr === -1 || newPtr > end) break;
+                ptr = newPtr;
+            }
+        }
+        return undefined;
+    }
+
+    private skipField(buffer: Buffer, ptr: number, wireType: number): number {
+        try {
+            switch (wireType) {
+                case 0: // Varint
+                    const { bytesRead } = this.readVarintTuple(buffer, ptr);
+                    return ptr + bytesRead;
+                case 1: // 64-bit
+                    return ptr + 8;
+                case 2: // Length delim
+                    const { value: len, bytesRead: lenBytes } = this.readVarintTuple(buffer, ptr);
+                    return ptr + lenBytes + len;
+                case 5: // 32-bit
+                    return ptr + 4;
+                default:
+                    return -1;
+            }
+        } catch {
+            return -1;
+        }
+    }
+
+    private readVarintTuple(buffer: Buffer, offset: number): { value: number; bytesRead: number } {
         let value = 0;
         let shift = 0;
         let i = offset;
@@ -218,12 +301,12 @@ export class DatabaseReader {
         while (i < buffer.length && shift < 35) {
             const byte = buffer[i];
             value |= (byte & 0x7f) << shift;
+            i++;
             if ((byte & 0x80) === 0) break;
             shift += 7;
-            i++;
         }
 
-        return value;
+        return { value, bytesRead: i - offset };
     }
 
     private extractPlanName(buffer: Buffer): string | undefined {
