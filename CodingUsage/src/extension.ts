@@ -118,6 +118,9 @@ function registerCommands(
     vscode.commands.registerCommand('cursorUsage.showOutput', () => {
       providers.forEach(p => p.showOutput());
     }),
+    vscode.commands.registerCommand('cursorUsage.showDetailedUsage', () => {
+      cursorProvider?.showDetailedUsage();
+    }),
     vscode.commands.registerCommand('cursorUsage.copyApiKey', async () => {
       const apiKey = getClientApiKey();
       const teamServerUrl = getTeamServerUrl();
@@ -183,6 +186,12 @@ async function showUpdateSessionDialog(context: vscode.ExtensionContext): Promis
       description: `Open ${APP_NAME} dashboard in browser`,
       detail: dashboardUrl,
       action: 'visitDashboard'
+    },
+    {
+      label: '$(list-flat) Show Detailed Usage',
+      description: 'View recent combined usage events',
+      detail: 'Show recent usage events from Cursor API and local generations',
+      action: 'showDetailedUsage'
     }
   ];
 
@@ -197,6 +206,10 @@ async function showUpdateSessionDialog(context: vscode.ExtensionContext): Promis
     switch (selectedItem.action) {
       case 'visitDashboard':
         vscode.env.openExternal(vscode.Uri.parse(dashboardUrl));
+        break;
+
+      case 'showDetailedUsage':
+        vscode.commands.executeCommand('cursorUsage.showDetailedUsage');
         break;
 
       case 'toggleShowAll':

@@ -131,12 +131,41 @@ export class CursorApiService {
         logWithTime(`[API Response] POST ${url} => ${JSON.stringify(response.data)}`);
         return response.data;
     }
+
+    /**
+     * 获取 Cursor 过滤后的使用事件
+     */
+    public async fetchFilteredUsageEvents(
+        sessionToken: string, 
+        startDate: string, 
+        endDate: string, 
+        page: number = 1, 
+        pageSize: number = 100
+    ): Promise<import('./types').FilteredUsageEventsResponse> {
+        const url = `${CURSOR_API_BASE_URL}/dashboard/get-filtered-usage-events`;
+        const body = {
+            teamId: 0,
+            startDate,
+            endDate,
+            page,
+            pageSize
+        };
+        logWithTime(`[API Request] POST ${url} Body: ${JSON.stringify(body)}`);
+        const response = await axios.post<import('./types').FilteredUsageEventsResponse>(
+            url,
+            body,
+            {
+                headers: this.createCursorHeaders(sessionToken),
+                timeout: API_TIMEOUT
+            }
+        );
+        return response.data;
+    }
 }
 
 export function getCursorApiService(): CursorApiService {
     return CursorApiService.getInstance();
 }
-
 
 
 

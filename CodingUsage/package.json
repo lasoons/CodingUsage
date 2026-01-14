@@ -2,7 +2,7 @@
   "name": "coding-usage",
   "displayName": "Coding Usage",
   "description": "Share Cursor/Trae usage statistics with your team",
-  "version": "1.1.11",
+  "version": "1.2.0",
   "publisher": "whyuds",
   "repository": {
     "type": "git",
@@ -104,6 +104,13 @@
           "type": "boolean",
           "default": false,
           "description": "Show usage for all supported IDEs (Cursor, Trae, Antigravity) regardless of the current IDE."
+        },
+        "cursorUsage.recentEventsLimit": {
+          "type": "integer",
+          "default": 4,
+          "minimum": 0,
+          "maximum": 60,
+          "description": "Maximum number of recent events to display in tooltip (0 to disable)"
         }
       }
     }

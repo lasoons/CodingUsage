@@ -71,6 +71,40 @@ export interface SecondaryAccountData {
     aggregatedData: AggregatedUsageResponse | null;
 }
 
+export interface TokenUsage {
+    inputTokens: number;
+    outputTokens: number;
+    cacheWriteTokens: number;
+    cacheReadTokens: number;
+    totalCents: number;
+}
+
+export interface UsageEvent {
+    timestamp: string;
+    model: string;
+    kind: string;
+    maxMode: boolean;
+    requestsCosts: number;
+    usageBasedCosts: string;
+    isTokenBasedCall: boolean;
+    tokenUsage: TokenUsage;
+    owningUser: string;
+    cursorTokenFee: number;
+    isChargeable: boolean;
+}
+
+export interface FilteredUsageEventsResponse {
+    totalUsageEventsCount: number;
+    usageEventsDisplay: UsageEvent[];
+}
+
+export interface GenerationItem {
+    unixMs: number;
+    generationUUID: string;
+    type: string;
+    textDescription: string;
+}
+
 
 
 

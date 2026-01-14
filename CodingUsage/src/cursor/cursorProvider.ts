@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as os from 'os';
 import * as path from 'path';
 import * as fs from 'fs-extra';
+import * as crypto from 'crypto';
 import initSqlJs from 'sql.js';
 import {
     logWithTime,
@@ -9,6 +10,7 @@ import {
     getAdditionalSessionTokens,
     isShowAllProvidersEnabled,
     filterTokensByIdeType,
+    getRecentEventsLimit,
 } from '../common/utils';
 import {
     DOUBLE_CLICK_DELAY,
@@ -45,6 +47,61 @@ async function getGlobalStorageDbPath(): Promise<string> {
     }
 }
 
+async function getWorkspaceStorageDbPathForCurrentWorkspace(): Promise<string | null> {
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if (!workspaceFolders || workspaceFolders.length === 0) {
+        return null;
+    }
+    const workspaceDir = workspaceFolders[0].uri.fsPath;
+    try {
+        if (!(await fs.pathExists(workspaceDir))) {
+            return null;
+        }
+        const stats = await fs.stat(workspaceDir);
+        const ctime = (stats as any).birthtimeMs || (stats as any).ctimeMs;
+        const normalizedPath = os.platform() === 'win32'
+            ? workspaceDir.replace(/^([A-Z]):/, (_match, letter) => (letter as string).toLowerCase() + ':')
+            : workspaceDir;
+        const hashInput = normalizedPath + Math.floor(ctime).toString();
+        const workspaceId = crypto.createHash('md5').update(hashInput, 'utf8').digest('hex');
+
+        let baseStoragePath: string;
+        const platform = os.platform();
+        const homeDir = os.homedir();
+        const appFolderName = vscode.env.appName || 'Cursor';
+
+        switch (platform) {
+            case 'win32': {
+                const appData = process.env.APPDATA || path.join(homeDir, 'AppData', 'Roaming');
+                baseStoragePath = path.join(appData, appFolderName, 'User', 'workspaceStorage');
+                break;
+            }
+            case 'darwin':
+                baseStoragePath = path.join(homeDir, 'Library', 'Application Support', appFolderName, 'User', 'workspaceStorage');
+                break;
+            default:
+                baseStoragePath = path.join(homeDir, '.config', appFolderName, 'User', 'workspaceStorage');
+                break;
+        }
+
+        const stateDbPath = path.join(baseStoragePath, workspaceId, 'state.vscdb');
+        if (await fs.pathExists(stateDbPath)) {
+            return stateDbPath;
+        }
+        return null;
+    } catch {
+        return null;
+    }
+}
+
+function formatTimeToSecond(epochMs: number): string {
+    const date = new Date(epochMs);
+    const hh = date.getHours().toString().padStart(2, '0');
+    const mm = date.getMinutes().toString().padStart(2, '0');
+    const ss = date.getSeconds().toString().padStart(2, '0');
+    return `${hh}:${mm}:${ss}`;
+}
+
 async function readAccessTokenFromDb(context: vscode.ExtensionContext): Promise<string | null> {
     try {
         const wasmPath = vscode.Uri.joinPath(context.extensionUri, 'out', 'sql-wasm.wasm').fsPath;
@@ -70,6 +127,53 @@ async function readAccessTokenFromDb(context: vscode.ExtensionContext): Promise<
         logWithTime(`读取 accessToken 失败: ${error}`);
         return null;
     }
+}
+
+async function readGenerationsFromDb(context: vscode.ExtensionContext): Promise<import('./types').GenerationItem[]> {
+    try {
+        const wasmPath = vscode.Uri.joinPath(context.extensionUri, 'out', 'sql-wasm.wasm').fsPath;
+        const workspaceDbPath = await getWorkspaceStorageDbPathForCurrentWorkspace();
+        const dbPath = workspaceDbPath || await getGlobalStorageDbPath();
+
+        if (!await fs.pathExists(dbPath)) {
+            return [];
+        }
+
+        const SQL = await initSqlJs({ locateFile: () => wasmPath });
+        const fileBuffer = await fs.readFile(dbPath);
+        const db = new SQL.Database(fileBuffer);
+        const res = db.exec(`SELECT value FROM ItemTable WHERE key = 'aiService.generations';`);
+        db.close();
+
+        if (res && res.length > 0 && res[0].values && res[0].values.length > 0) {
+            const val = res[0].values[0][0];
+            const raw = typeof val === 'string' ? val : JSON.stringify(val);
+            try {
+                return JSON.parse(raw) as import('./types').GenerationItem[];
+            } catch {
+                return [];
+            }
+        }
+        return [];
+    } catch (error) {
+        logWithTime(`读取 generations 失败: ${error}`);
+        return [];
+    }
+}
+
+function getCacheType(cacheWriteTokens: number, cacheReadTokens: number): string {
+    const write = cacheWriteTokens || 0;
+    const read = cacheReadTokens || 0;
+    const total = write + read;
+    if (total === 0) return 'UNKNOWN';
+    const writeRatio = write / total;
+    if (writeRatio < 0.1) {
+        return 'HIGH_HIT';
+    }
+    if (writeRatio > 0.6) {
+        return 'COLD_WRITE';
+    }
+    return 'INCREMENTAL';
 }
 
 function constructSessionToken(accessToken: string): string | null {
@@ -119,11 +223,22 @@ async function readCachedEmailFromDbLocal(context: vscode.ExtensionContext): Pro
     }
 }
 
+function getStringDisplayWidth(str: string): number {
+    let width = 0;
+    for (let i = 0; i < str.length; i++) {
+        const code = str.charCodeAt(i);
+        // ASCII 字符 (0-127) 算 1 个宽度，其他（主要是中文/全角符号）算 2 个宽度
+        width += code >= 0 && code <= 127 ? 1 : 2;
+    }
+    return width;
+}
+
 export class CursorProvider implements IUsageProvider {
     private billingCycleData: BillingCycleResponse | null = null;
     private summaryData: UsageSummaryResponse | null = null;
     private aggregatedUsageData: AggregatedUsageResponse | null = null;
     private secondaryAccountsData: Map<string, SecondaryAccountData> = new Map();
+    private recentEvents: any[] = [];
     private primaryEmail: string | null = null;
 
     private retryTimer: NodeJS.Timeout | null = null;
@@ -211,6 +326,203 @@ export class CursorProvider implements IUsageProvider {
         outputChannel.show();
     }
 
+    public async showDetailedUsage(): Promise<void> {
+        const panel = vscode.window.createWebviewPanel(
+            'cursorDetailedUsage',
+            'Cursor Recent Usage',
+            vscode.ViewColumn.One,
+            { enableScripts: true }
+        );
+
+        panel.webview.html = '<div style="padding: 20px;">Loading data...</div>';
+
+        try {
+            const accessToken = await readAccessTokenFromDb(this.context);
+            const sessionToken = accessToken ? constructSessionToken(accessToken) : null;
+            const events = await this.getCombinedRecentEventsInternal(sessionToken);
+            panel.webview.html = this.generateUsageHtml(events);
+        } catch (e) {
+            panel.webview.html = `<div style="padding: 20px; color: red;">Error loading data: ${e}</div>`;
+        }
+    }
+
+    private async getCombinedRecentEventsInternal(sessionToken: string | null): Promise<any[]> {
+        const generations = await readGenerationsFromDb(this.context);
+
+        let usageEvents: import('./types').UsageEvent[] = [];
+        if (sessionToken) {
+            const now = new Date();
+            const endDate = now.getTime().toString();
+            const startDate = (now.getTime() - 30 * 24 * 60 * 60 * 1000).toString();
+
+            try {
+                const resp = await this.apiService.fetchFilteredUsageEvents(sessionToken, startDate, endDate, 1, 100);
+                if (resp && resp.usageEventsDisplay) {
+                    usageEvents = resp.usageEventsDisplay;
+                }
+            } catch (e) {
+                logWithTime(`Fetch usage events failed: ${e}`);
+            }
+        }
+
+        const combined = [];
+
+        for (const gen of generations) {
+            combined.push({
+                unixMs: gen.unixMs,
+                type: 'generation',
+                details: gen
+            });
+        }
+
+        for (const evt of usageEvents) {
+            combined.push({
+                unixMs: parseInt(evt.timestamp),
+                type: 'usage',
+                details: evt
+            });
+        }
+
+        combined.sort((a, b) => b.unixMs - a.unixMs);
+
+        return combined;
+    }
+
+    private async getCombinedRecentEvents(): Promise<any[]> {
+        const accessToken = await readAccessTokenFromDb(this.context);
+        const sessionToken = accessToken ? constructSessionToken(accessToken) : null;
+        return this.getCombinedRecentEventsInternal(sessionToken);
+    }
+
+    private generateUsageHtml(events: any[]): string {
+        let html = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Cursor Usage</title>
+            <style>
+                body { font-family: var(--vscode-font-family); padding: 10px; color: var(--vscode-editor-foreground); background-color: var(--vscode-editor-background); }
+                .event-item { padding: 8px; border-bottom: 1px solid var(--vscode-panel-border); display: flex; align-items: center; justify-content: space-between; }
+                .time { font-size: 0.9em; color: var(--vscode-descriptionForeground); min-width: 150px; flex-shrink: 0; }
+                .content { flex: 1; margin-left: 10px; display: flex; align-items: center; min-width: 0; }
+                .text-ellipsis { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+                .bold { font-weight: bold; }
+                .tooltip { position: relative; display: inline-flex; max-width: 100%; cursor: help; border-bottom: 1px dotted var(--vscode-textLink-foreground); }
+                .tooltip .tooltiptext {
+                    visibility: hidden;
+                    min-width: 200px;
+                    max-width: 400px;
+                    width: max-content;
+                    background-color: var(--vscode-editorHoverWidget-background);
+                    color: var(--vscode-editorHoverWidget-foreground);
+                    text-align: left;
+                    border: 1px solid var(--vscode-editorHoverWidget-border);
+                    border-radius: 4px;
+                    padding: 8px;
+                    position: absolute;
+                    z-index: 100;
+                    bottom: 125%;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    opacity: 0;
+                    transition: opacity 0.3s;
+                    font-size: 0.9em;
+                    white-space: pre-wrap;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+                }
+                .tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
+                .tag { font-size: 0.8em; padding: 2px 6px; border-radius: 4px; margin-right: 5px; font-weight: bold; flex-shrink: 0; }
+                .tag-gen { background-color: var(--vscode-badge-background); color: var(--vscode-badge-foreground); }
+                .tag-usage { background-color: var(--vscode-button-background); color: var(--vscode-button-foreground); }
+                h2 { border-bottom: 1px solid var(--vscode-panel-border); padding-bottom: 10px; }
+            </style>
+        </head>
+        <body>
+            <div class="events-list">
+                <div class="event-item" style="font-weight: bold; border-bottom: 2px solid var(--vscode-panel-border);">
+                    <div class="time">Event Time</div>
+                    <div class="content">Event Detail</div>
+                </div>
+        `;
+
+        events.forEach(item => {
+            const date = new Date(item.unixMs);
+            const timeStr = date.toLocaleString('zh-CN', { hour12: false }); // Use local time format
+
+            if (item.type === 'generation') {
+                const gen = item.details as import('./types').GenerationItem;
+                const desc = gen.textDescription || '';
+                let displayDesc = desc;
+                if (desc.length > 30) {
+                    displayDesc = desc.substring(0, 30) + `... (${desc.length - 30})`;
+                }
+
+                html += `
+                <div class="event-item">
+                    <div class="time">${timeStr}</div>
+                    <div class="content">
+                        <span class="tag tag-gen">GEN</span>
+                        <span class="text-ellipsis" title="${desc.replace(/"/g, '&quot;')}">${displayDesc}</span>
+                    </div>
+                </div>
+                `;
+            } else {
+                const evt = item.details as import('./types').UsageEvent;
+                const tokenUsage = evt.tokenUsage;
+                const totalTokens = tokenUsage ? (tokenUsage.inputTokens + tokenUsage.outputTokens + tokenUsage.cacheWriteTokens + tokenUsage.cacheReadTokens) : 0;
+
+                let cacheHitRatio = "0%";
+                let cacheType = "UNKNOWN";
+                let totalCents = 0;
+
+                if (tokenUsage) {
+                    const cacheTotal = tokenUsage.cacheWriteTokens + tokenUsage.cacheReadTokens;
+                    if (cacheTotal > 0) {
+                        cacheHitRatio = ((tokenUsage.cacheReadTokens / cacheTotal) * 100).toFixed(1) + "%";
+                    }
+                    cacheType = getCacheType(tokenUsage.cacheWriteTokens, tokenUsage.cacheReadTokens);
+                    totalCents = tokenUsage.totalCents || 0;
+                }
+
+                const isColdWrite = cacheType === 'COLD_WRITE';
+                const styleClass = isColdWrite ? 'bold' : '';
+
+                const tooltipContent = `Model: ${evt.model}
+Total Tokens: ${totalTokens}
+Input: ${tokenUsage?.inputTokens || 0}
+Output: ${tokenUsage?.outputTokens || 0}
+Cache Write: ${tokenUsage?.cacheWriteTokens || 0}
+Cache Read: ${tokenUsage?.cacheReadTokens || 0}
+Hit Ratio: ${cacheHitRatio}
+Cost: ${totalCents > 0 ? totalCents.toFixed(4) + ' cents' : '0'}
+Type: ${cacheType}`;
+
+                html += `
+                <div class="event-item ${styleClass}">
+                    <div class="time">${timeStr}</div>
+                    <div class="content">
+                        <span class="tag tag-usage">USE</span>
+                        <div class="tooltip">
+                            <span class="text-ellipsis">${evt.model} (Total: ${totalTokens})</span>
+                            <span class="tooltiptext">${tooltipContent}</span>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }
+        });
+
+        html += `
+            </div>
+        </body>
+        </html>
+        `;
+
+        return html;
+    }
+
     public dispose(): void {
         if (this.retryTimer) clearTimeout(this.retryTimer);
         this.clearClickTimer();
@@ -283,6 +595,13 @@ export class CursorProvider implements IUsageProvider {
             endDateEpochMillis: String(endMillis)
         };
         this.summaryData = summary;
+
+        try {
+            this.recentEvents = await this.getCombinedRecentEventsInternal(sessionToken);
+        } catch (e) {
+            logWithTime(`获取 recent events 失败: ${e}`);
+            this.recentEvents = [];
+        }
 
         try {
             const billingCycle = await this.apiService.fetchCursorBillingCycle(sessionToken);
@@ -420,7 +739,8 @@ export class CursorProvider implements IUsageProvider {
             this.aggregatedUsageData,
             this.secondaryAccountsData,
             this.primaryEmail,
-            new Date()
+            new Date(),
+            this.recentEvents
         );
     }
 
@@ -430,7 +750,8 @@ export class CursorProvider implements IUsageProvider {
         aggregatedData: AggregatedUsageResponse | null,
         secondaryAccounts?: Map<string, SecondaryAccountData>,
         primaryEmail?: string | null,
-        currentTime?: Date
+        currentTime?: Date,
+        recentEvents?: any[]
     ): vscode.MarkdownString {
         if (!summary || !billing) {
             return new vscode.MarkdownString('Primary account not detected. Please ensure you are logged in to Cursor.\n\nSingle click: Refresh\nDouble click: Settings');
@@ -542,6 +863,45 @@ export class CursorProvider implements IUsageProvider {
 
             md.appendMarkdown('\n');
             md.appendCodeblock(CursorProvider.generateMultiRowAsciiTable(headers, rows), 'text');
+        }
+
+        const eventsLimit = getRecentEventsLimit();
+        if (eventsLimit > 0 && recentEvents && recentEvents.length > 0) {
+            md.appendMarkdown('\n---\n');
+
+            const eventsToShow = recentEvents.slice(0, eventsLimit);
+            for (const item of eventsToShow) {
+                const date = new Date(Number(item.unixMs));
+                const dateStr = date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+                const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+
+                if (item.type === 'generation') {
+                    const gen = item.details as import('./types').GenerationItem;
+                    const desc = (gen.textDescription || '').replace(/[\r\n\t]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
+                    let displayDesc = desc;
+                    if (desc.length > 30) {
+                        displayDesc = desc.substring(0, 30) + '...';
+                    }
+                    md.appendMarkdown(`[${dateStr}, ${timeStr}] [user] ${displayDesc}\n\n`);
+                } else {
+                    const evt = item.details as import('./types').UsageEvent;
+                    const tokenUsage = evt.tokenUsage;
+                    const modelName = CursorProvider.shortenModelName(evt.model || 'unknown');
+
+                    const inputTokens = Number((tokenUsage as any)?.inputTokens ?? 0);
+                    const outputTokens = Number((tokenUsage as any)?.outputTokens ?? 0);
+                    const cacheWriteTokens = Number((tokenUsage as any)?.cacheWriteTokens ?? 0);
+                    const cacheReadTokens = Number((tokenUsage as any)?.cacheReadTokens ?? 0);
+                    const totalTokens = inputTokens + outputTokens + cacheWriteTokens + cacheReadTokens;
+
+                    const cacheTotal = cacheWriteTokens + cacheReadTokens;
+                    const cacheReadRatio = cacheTotal > 0 ? ((cacheReadTokens / cacheTotal) * 100).toFixed(1) + '%' : '0%';
+                    const totalCents = Number((tokenUsage as any)?.totalCents ?? 0);
+                    const tokensStr = CursorProvider.formatTokenCount(totalTokens);
+
+                    md.appendMarkdown(`[${dateStr}, ${timeStr}] [${modelName}] [Cost] ${totalCents.toFixed(1)} [Token] ${tokensStr} [Cache Rate] ${cacheReadRatio}\n\n`);
+                }
+            }
         }
 
         if (secondaryAccounts && secondaryAccounts.size > 0) {
@@ -689,14 +1049,19 @@ export class CursorProvider implements IUsageProvider {
 
     private static generateMultiRowAsciiTable(headers: string[], rows: string[][]): string {
         const colWidths = headers.map((header, colIndex) => {
-            const maxRowWidth = Math.max(...rows.map(row => (row[colIndex] || '').length));
-            return Math.max(header.length, maxRowWidth) + 2;
+            const maxRowWidth = Math.max(...rows.map(row => getStringDisplayWidth(row[colIndex] || '')));
+            return Math.max(getStringDisplayWidth(header), maxRowWidth) + 2;
         });
 
         const buildRow = (items: string[]) => {
             return '│' + items.map((item, i) => {
-                const padding = colWidths[i] - item.length;
-                const leftPad = Math.floor(padding / 2);
+                const itemWidth = getStringDisplayWidth(item);
+                const padding = colWidths[i] - itemWidth;
+
+                // For the last column (Details), align left (padding only on right)
+                // For other columns, align center
+                const isLastColumn = i === items.length - 1;
+                const leftPad = isLastColumn ? 1 : Math.floor(padding / 2);
                 const rightPad = padding - leftPad;
                 return ' '.repeat(leftPad) + item + ' '.repeat(rightPad);
             }).join('│') + '│';
@@ -719,14 +1084,6 @@ export class CursorProvider implements IUsageProvider {
         return result.join('\n');
     }
 }
-
-
-
-
-
-
-
-
 
 
 

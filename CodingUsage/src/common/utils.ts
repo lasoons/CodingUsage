@@ -165,6 +165,11 @@ export function isShowAllProvidersEnabled(): boolean {
     return getConfig().get<boolean>('showAllProviders') || false;
 }
 
+// 获取最近事件显示数量限制（0 表示禁用）
+export function getRecentEventsLimit(): number {
+    return getConfig().get<number>('recentEventsLimit') ?? 5;
+}
+
 // ==================== 输出通道管理 ====================
 let outputChannel: vscode.OutputChannel;
 
@@ -204,12 +209,12 @@ function simplifyForOutput(message: string): string {
             return `${prefix}${jsonPart.substring(0, MAX_OUTPUT_LENGTH)}...`;
         }
     }
-    
+
     // 对于其他过长的消息也进行截断
     if (message.length > MAX_OUTPUT_LENGTH + 50) {
         return message.substring(0, MAX_OUTPUT_LENGTH + 50) + '...';
     }
-    
+
     return message;
 }
 
@@ -246,9 +251,9 @@ export async function exportSessionLogs(): Promise<void> {
         vscode.window.showInformationMessage('没有可导出的日志');
         return;
     }
-    
+
     const defaultFileName = `coding-usage-logs-${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}.log`;
-    
+
     const uri = await vscode.window.showSaveDialog({
         defaultUri: vscode.Uri.file(defaultFileName),
         filters: {
@@ -257,7 +262,7 @@ export async function exportSessionLogs(): Promise<void> {
         },
         saveLabel: '导出日志'
     });
-    
+
     if (uri) {
         const logContent = sessionLogs.join('\n');
         await vscode.workspace.fs.writeFile(uri, Buffer.from(logContent, 'utf-8'));
@@ -277,13 +282,13 @@ export function logWithTime(message: string): void {
         hour12: false
     });
     const fullLogMessage = `[${timestamp}] ${message}`;
-    
+
     // 保存完整日志用于导出
     addToSessionLogs(fullLogMessage);
-    
+
     // 控制台输出完整日志
     console.log(fullLogMessage);
-    
+
     // Output channel 输出简化后的日志
     const simplifiedMessage = simplifyForOutput(message);
     const simplifiedLogMessage = `[${timestamp}] ${simplifiedMessage}`;
@@ -358,7 +363,7 @@ export function getTokenIdeType(token: string): TokenIdeType {
     if (!token) {
         return 'unknown';
     }
-    
+
     // Cursor token 判断：
     // 1. 完整格式: WorkosCursorSessionToken=xxx
     // 2. 纯 token 格式: userId%3A%3AjwtToken (包含 %3A%3A 即 ::)
@@ -375,7 +380,7 @@ export function getTokenIdeType(token: string): TokenIdeType {
     if (jwtPattern.test(token) || (token.split('.').length === 3 && !token.includes('-'))) {
         return 'cursor';
     }
-    
+
     // Trae token 判断：
     // 1. 完整格式: X-Cloudide-Session=xxx
     // 2. UUID 格式: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
@@ -387,7 +392,7 @@ export function getTokenIdeType(token: string): TokenIdeType {
     if (uuidPattern.test(token)) {
         return 'trae';
     }
-    
+
     return 'unknown';
 }
 
