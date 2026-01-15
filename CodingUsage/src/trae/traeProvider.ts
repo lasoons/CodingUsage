@@ -394,7 +394,7 @@ export class TraeProvider implements IUsageProvider {
         if (showAll) {
             this.statusBarItem.text = `$(trae-logo) ${Math.round(percentage)}%`;
         } else {
-            this.statusBarItem.text = `$(trae-logo) Fast: ${totalUsage}/${totalLimit} (${remainingFormatted} Left)`;
+            this.statusBarItem.text = `$(trae-logo) Fast: ${totalUsage.toFixed(1)}/${totalLimit} (${remainingFormatted} Left)`;
         }
         this.statusBarItem.color = undefined;
         this.statusBarItem.tooltip = this.buildTraeDetailedTooltip();
@@ -483,7 +483,7 @@ export class TraeProvider implements IUsageProvider {
 
                     if (totalLimit > 0) {
                         const progressInfo = TraeProvider.buildProgressBar(totalUsage, totalLimit);
-                        const usageFormatted = `${totalUsage.toFixed(0)}/${totalLimit}`;
+                        const usageFormatted = `${totalUsage.toFixed(1)}/${totalLimit}`;
                         // 获取第一个有效 pack 的结束时间作为 Resets 时间
                         const endTime = formatTimeWithoutYear(accValidPacks[0].entitlement_base_info.end_time, true);
                         md.appendMarkdown(`Fast (${usageFormatted}) [${progressInfo.progressBar}] ${progressInfo.percentage}% ${endTime}\n\n`);
@@ -543,7 +543,7 @@ export class TraeProvider implements IUsageProvider {
 
             if (fastLimit > 0) {
                 const progressInfo = TraeProvider.buildProgressBar(fastUsed, fastLimit);
-                const planLabel = `${subscriptionType}(${fastUsed.toFixed(0)}/${fastLimit})`;
+                const planLabel = `${subscriptionType}(${fastUsed.toFixed(1)}/${fastLimit})`;
                 tableRows += `| ${planLabel} | ${progressInfo.progressBar} ${progressInfo.percentage}% | ${endTime} |\n`;
             }
         });
