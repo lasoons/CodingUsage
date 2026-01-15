@@ -17,8 +17,20 @@ export class DatabaseReader {
     private readonly wasmPath: string;
 
     constructor(wasmPath: string) {
-        // Antigravity stores data in %APPDATA%/Antigravity on Windows
-        const appData = process.env.APPDATA || path.join(os.homedir(), 'AppData', 'Roaming');
+        const platform = os.platform();
+        let appData: string;
+        
+        if (platform === 'darwin') {
+            // macOS: ~/Library/Application Support/Antigravity
+            appData = path.join(os.homedir(), 'Library', 'Application Support');
+        } else if (platform === 'win32') {
+            // Windows: %APPDATA%/Antigravity
+            appData = process.env.APPDATA || path.join(os.homedir(), 'AppData', 'Roaming');
+        } else {
+            // Linux: ~/.config/Antigravity
+            appData = process.env.XDG_CONFIG_HOME || path.join(os.homedir(), '.config');
+        }
+        
         this.dbPath = path.join(appData, 'Antigravity', 'User', 'globalStorage', 'state.vscdb');
         this.wasmPath = wasmPath;
     }

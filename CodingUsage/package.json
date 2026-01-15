@@ -2,7 +2,7 @@
   "name": "coding-usage",
   "displayName": "Coding Usage",
   "description": "Share Cursor/Trae usage statistics with your team",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "publisher": "whyuds",
   "repository": {
     "type": "git",
@@ -123,6 +123,10 @@
     "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js",
     "package": "node esbuild.js",
+    "package:trae": "node build/package-manager.js trae",
+    "package:cursor": "node build/package-manager.js cursor",
+    "package:antigravity": "node build/package-manager.js antigravity",
+    "package:all": "node build/package-manager.js all",
     "build-icons": "node ./build/build-icons.js"
   },
   "devDependencies": {

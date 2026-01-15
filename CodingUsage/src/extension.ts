@@ -17,6 +17,8 @@ import { AntigravityProvider } from './antigravity/antigravityProvider';
 import { DbMonitor, ClipboardMonitor } from './common/monitors';
 import { ServerDiscovery, TeamServerClient, PingManager } from './teamServerClient';
 
+declare const EXTENSION_TARGET: string;
+
 export async function activate(context: vscode.ExtensionContext) {
   const appType = getAppType();
   
@@ -25,8 +27,12 @@ export async function activate(context: vscode.ExtensionContext) {
   const extension = vscode.extensions.getExtension(extensionId);
   const extensionVersion = extension?.packageJSON?.version || 'unknown';
   
+  // Get build target (injected by esbuild), default to 'all'
+  const buildTarget = typeof EXTENSION_TARGET !== 'undefined' ? EXTENSION_TARGET : 'all';
+
   logWithTime(`========== ${APP_NAME} Extension Activated ==========`);
   logWithTime(`Extension Version: ${extensionVersion}`);
+  logWithTime(`Build Target: ${buildTarget}`);
   logWithTime(`IDE: ${vscode.env.appName} (${vscode.env.appHost})`);
   logWithTime(`IDE Version: ${vscode.version}`);
   logWithTime(`App Type: ${appType}`);
@@ -43,25 +49,39 @@ export async function activate(context: vscode.ExtensionContext) {
   let traeProvider: TraeProvider | null = null;
   let antigravityProvider: AntigravityProvider | null = null;
 
-  if (showAll) {
-    cursorProvider = new CursorProvider(context);
-    traeProvider = new TraeProvider(context);
-    antigravityProvider = new AntigravityProvider(context);
-    providers.push(cursorProvider, traeProvider, antigravityProvider);
+  if (buildTarget === 'all') {
+    if (showAll) {
+      cursorProvider = new CursorProvider(context);
+      traeProvider = new TraeProvider(context);
+      antigravityProvider = new AntigravityProvider(context);
+      providers.push(cursorProvider, traeProvider, antigravityProvider);
+    } else {
+      if (appType === 'cursor') {
+        cursorProvider = new CursorProvider(context);
+        providers.push(cursorProvider);
+      } else if (appType === 'trae') {
+        traeProvider = new TraeProvider(context);
+        providers.push(traeProvider);
+      } else if (appType === 'antigravity') {
+        antigravityProvider = new AntigravityProvider(context);
+        providers.push(antigravityProvider);
+      } else {
+        logWithTime('Unknown App Type, defaulting to Cursor logic');
+        cursorProvider = new CursorProvider(context);
+        providers.push(cursorProvider);
+      }
+    }
   } else {
-    if (appType === 'cursor') {
+    // Specific build targets
+    if (buildTarget === 'cursor') {
       cursorProvider = new CursorProvider(context);
       providers.push(cursorProvider);
-    } else if (appType === 'trae') {
+    } else if (buildTarget === 'trae') {
       traeProvider = new TraeProvider(context);
       providers.push(traeProvider);
-    } else if (appType === 'antigravity') {
+    } else if (buildTarget === 'antigravity') {
       antigravityProvider = new AntigravityProvider(context);
       providers.push(antigravityProvider);
-    } else {
-      logWithTime('Unknown App Type, defaulting to Cursor logic');
-      cursorProvider = new CursorProvider(context);
-      providers.push(cursorProvider);
     }
   }
 
